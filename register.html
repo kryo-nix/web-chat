@@ -4,7 +4,6 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Daftar - ChatKlasik</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💬</text></svg>">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
       @import url("https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&display=swap");
@@ -41,9 +40,7 @@
         animation: blink 1s step-start infinite;
       }
       @keyframes blink {
-        50% {
-          opacity: 0;
-        }
+        50% { opacity: 0; }
       }
       .scanline {
         background: repeating-linear-gradient(
@@ -76,251 +73,116 @@
       }
     </style>
   </head>
-  <body
-    class="min-h-screen bg-[#c8d8a8] flex items-center justify-center p-4 relative">
+  <body class="min-h-screen bg-[#c8d8a8] flex items-center justify-center p-4 relative">
     <div class="absolute inset-0 scanline"></div>
-    <div
-      class="absolute inset-0 opacity-10"
-      style="
-        background-image: repeating-linear-gradient(
-          45deg,
-          #2d4a2d 0,
-          #2d4a2d 1px,
-          transparent 0,
-          transparent 50%
-        );
-        background-size: 20px 20px;
-      "></div>
+    <div class="absolute inset-0 opacity-10" style="background-image: repeating-linear-gradient(45deg,#2d4a2d 0,#2d4a2d 1px,transparent 0,transparent 50%);background-size: 20px 20px;"></div>
 
     <!-- Header Banner -->
-    <div
-      class="absolute top-0 left-0 right-0 bg-[#2d4a2d] py-2 text-center z-10">
-      <p class="text-[#c8d8a8] text-xs tracking-widest font-bold">
-        ◆ CHATKLASIK v1.1 ◆ SECURE MESSAGING ◆
-      </p>
+    <div class="absolute top-0 left-0 right-0 bg-[#2d4a2d] py-2 text-center z-10">
+      <p class="text-[#c8d8a8] text-xs tracking-widest font-bold">◆ CHATKLASIK v1.1 ◆ SECURE MESSAGING ◆</p>
     </div>
 
     <!-- System Error Notification -->
-    <div
-      id="systemError"
-      class="hidden fixed top-16 left-1/2 transform -translate-x-1/2 bg-red-100 border-2 border-red-800 text-red-900 px-4 py-2 z-50 max-w-sm text-center shadow-lg">
+    <div id="systemError" class="hidden fixed top-16 left-1/2 transform -translate-x-1/2 bg-red-100 border-2 border-red-800 text-red-900 px-4 py-2 z-50 max-w-sm text-center shadow-lg">
       <p class="font-bold">SYSTEM ERROR</p>
       <p id="systemErrorMsg" class="text-xs">Gagal memuat modul sistem.</p>
     </div>
 
     <div class="w-full max-w-md mt-8 z-10 mb-8">
-      <div
-        class="bg-[#2d4a2d] text-center py-3 mb-0 classic-border"
-        style="border-bottom: none">
-        <h1 class="text-[#c8d8a8] text-2xl font-bold tracking-widest">
-          ■ DAFTAR AKUN ■
-        </h1>
-        <p class="text-[#8fb88f] text-xs tracking-wider mt-1">
-          [ BUAT AKUN BARU ]
-        </p>
+      <div class="bg-[#2d4a2d] text-center py-3 mb-0 classic-border" style="border-bottom: none">
+        <h1 class="text-[#c8d8a8] text-2xl font-bold tracking-widest">■ DAFTAR AKUN ■</h1>
+        <p class="text-[#8fb88f] text-xs tracking-wider mt-1">[ BUAT AKUN BARU ]</p>
       </div>
 
       <div class="bg-[#e8f0d8] classic-border p-6">
         <div class="border-b-2 border-[#2d4a2d] mb-4 pb-2">
-          <h2 class="text-[#2d4a2d] font-bold text-lg tracking-widest">
-            ▶ REGISTRASI
-          </h2>
-          <p class="text-[#4a6a4a] text-xs mt-1">
-            Lengkapi data berikut untuk membuat akun
-          </p>
+          <h2 class="text-[#2d4a2d] font-bold text-lg tracking-widest">▶ REGISTRASI</h2>
+          <p class="text-[#4a6a4a] text-xs mt-1">Lengkapi data berikut untuk membuat akun</p>
         </div>
 
         <!-- Alert Boxes -->
-        <div
-          id="alertBox"
-          class="hidden mb-4 p-3 border-2 border-[#8b0000] bg-[#ffe8e8] text-[#8b0000] text-sm break-words"></div>
-        <div
-          id="successBox"
-          class="hidden mb-4 p-3 border-2 border-[#2d4a2d] bg-[#e8f5e8] text-[#2d4a2d] text-sm"></div>
+        <div id="alertBox" class="hidden mb-4 p-3 border-2 border-[#8b0000] bg-[#ffe8e8] text-[#8b0000] text-sm break-words"></div>
+        <div id="successBox" class="hidden mb-4 p-3 border-2 border-[#2d4a2d] bg-[#e8f5e8] text-[#2d4a2d] text-sm"></div>
 
         <form id="registerForm" class="space-y-4">
           <!-- Avatar Upload -->
-          <div
-            class="flex flex-col items-center gap-3 py-3 border-2 border-dashed border-[#2d4a2d] bg-[#f0f5e8] px-4">
-            <p class="text-[#2d4a2d] text-xs font-bold tracking-wider">
-              FOTO PROFIL (OPSIONAL):
-            </p>
+          <div class="flex flex-col items-center gap-3 py-3 border-2 border-dashed border-[#2d4a2d] bg-[#f0f5e8] px-4">
+            <p class="text-[#2d4a2d] text-xs font-bold tracking-wider">FOTO PROFIL (OPSIONAL):</p>
             <div class="relative group">
-              <img
-                id="avatarPreview"
-                src="https://ui-avatars.com/api/?name=User&background=d0ddb8&color=2d4a2d&size=80"
-                alt="Avatar Preview"
-                class="avatar-preview group-hover:brightness-90 transition" />
-              <div
-                class="absolute -bottom-2 -right-2 bg-[#2d4a2d] text-[#c8d8a8] text-xs px-1 cursor-pointer border border-[#c8d8a8] hover:bg-[#1a3a1a]"
-                id="changeAvatarBtn"
-                title="Ganti Foto">
-                +
-              </div>
+              <img id="avatarPreview" src="https://ui-avatars.com/api/?name=User&background=d0ddb8&color=2d4a2d&size=80" alt="Avatar Preview" class="avatar-preview group-hover:brightness-90 transition" />
+              <div class="absolute -bottom-2 -right-2 bg-[#2d4a2d] text-[#c8d8a8] text-xs px-1 cursor-pointer border border-[#c8d8a8] hover:bg-[#1a3a1a]" id="changeAvatarBtn" title="Ganti Foto">+</div>
             </div>
-            <input
-              type="file"
-              id="avatarInput"
-              accept="image/*"
-              class="hidden" />
-            <button
-              type="button"
-              id="uploadAvatarBtn"
-              class="classic-btn bg-[#c8d8a8] text-[#2d4a2d] px-4 py-1 text-xs font-bold tracking-wider">
-              ▶ PILIH FOTO
-            </button>
+            <input type="file" id="avatarInput" accept="image/*" class="hidden" />
+            <button type="button" id="uploadAvatarBtn" class="classic-btn bg-[#c8d8a8] text-[#2d4a2d] px-4 py-1 text-xs font-bold tracking-wider">▶ PILIH FOTO</button>
             <p class="text-[#8fb88f] text-xs">Max 500KB | JPG, PNG</p>
           </div>
 
           <div>
-            <label
-              class="block text-[#2d4a2d] text-sm font-bold mb-1 tracking-wider"
-              >NAMA LENGKAP:</label
-            >
-            <input
-              id="nameInput"
-              type="text"
-              placeholder="John Doe"
-              required
-              maxlength="50"
-              autocomplete="name"
-              class="classic-input w-full px-3 py-2 text-sm text-[#2d4a2d] placeholder-[#8fb88f]" />
+            <label class="block text-[#2d4a2d] text-sm font-bold mb-1 tracking-wider">NAMA LENGKAP:</label>
+            <input id="nameInput" type="text" placeholder="John Doe" required maxlength="50" autocomplete="name" class="classic-input w-full px-3 py-2 text-sm text-[#2d4a2d] placeholder-[#8fb88f]" />
           </div>
 
           <div>
-            <label
-              class="block text-[#2d4a2d] text-sm font-bold mb-1 tracking-wider">
+            <label class="block text-[#2d4a2d] text-sm font-bold mb-1 tracking-wider">
               NAME TAG:
-              <span class="text-[#8fb88f] font-normal text-xs"
-                >(untuk mention @namatag)</span
-              >
+              <span class="text-[#8fb88f] font-normal text-xs">(untuk mention @namatag)</span>
             </label>
             <div class="flex items-center">
-              <span
-                class="classic-input px-2 py-2 text-[#4a6a4a] text-sm border-r-0"
-                style="border: 2px solid #2d4a2d; background: #d0ddb8"
-                >@</span
-              >
-              <input
-                id="nameTagInput"
-                type="text"
-                placeholder="johndoe"
-                required
-                maxlength="20"
-                autocomplete="off"
-                class="classic-input flex-1 px-3 py-2 text-sm text-[#2d4a2d] placeholder-[#8fb88f]"
-                style="border-left: none" />
+              <span class="classic-input px-2 py-2 text-[#4a6a4a] text-sm border-r-0" style="border: 2px solid #2d4a2d; background: #d0ddb8">@</span>
+              <input id="nameTagInput" type="text" placeholder="johndoe" required maxlength="20" autocomplete="off" class="classic-input flex-1 px-3 py-2 text-sm text-[#2d4a2d] placeholder-[#8fb88f]" style="border-left: none" />
             </div>
-            <p class="text-[#8fb88f] text-xs mt-1">
-              Huruf kecil, angka, garis bawah. Tanpa spasi.
-            </p>
+            <p class="text-[#8fb88f] text-xs mt-1">Huruf kecil, angka, garis bawah. Tanpa spasi.</p>
           </div>
 
           <div>
-            <label
-              class="block text-[#2d4a2d] text-sm font-bold mb-1 tracking-wider"
-              >EMAIL:</label
-            >
-            <input
-              id="emailInput"
-              type="email"
-              placeholder="user@email.com"
-              required
-              autocomplete="email"
-              class="classic-input w-full px-3 py-2 text-sm text-[#2d4a2d] placeholder-[#8fb88f]" />
+            <label class="block text-[#2d4a2d] text-sm font-bold mb-1 tracking-wider">EMAIL:</label>
+            <input id="emailInput" type="email" placeholder="user@email.com" required autocomplete="email" class="classic-input w-full px-3 py-2 text-sm text-[#2d4a2d] placeholder-[#8fb88f]" />
           </div>
 
           <div>
-            <label
-              class="block text-[#2d4a2d] text-sm font-bold mb-1 tracking-wider"
-              >PASSWORD:</label
-            >
+            <label class="block text-[#2d4a2d] text-sm font-bold mb-1 tracking-wider">PASSWORD:</label>
             <div class="relative">
-              <input
-                id="passwordInput"
-                type="password"
-                placeholder="Min. 6 karakter"
-                required
-                minlength="6"
-                autocomplete="new-password"
-                class="classic-input w-full px-3 py-2 text-sm text-[#2d4a2d] placeholder-[#8fb88f]" />
-              <button
-                type="button"
-                id="togglePassword"
-                class="absolute right-2 top-1/2 -translate-y-1/2 text-[#4a6a4a] text-xs hover:text-[#2d4a2d] font-bold underline decoration-dotted">
-                LIHAT
-              </button>
+              <input id="passwordInput" type="password" placeholder="Min. 6 karakter" required minlength="6" autocomplete="new-password" class="classic-input w-full px-3 py-2 text-sm text-[#2d4a2d] placeholder-[#8fb88f]" />
+              <button type="button" id="togglePassword" class="absolute right-2 top-1/2 -translate-y-1/2 text-[#4a6a4a] text-xs hover:text-[#2d4a2d] font-bold underline decoration-dotted">LIHAT</button>
             </div>
           </div>
 
           <!-- Password Strength Indicator -->
           <div id="passwordStrength" class="hidden">
             <div class="flex gap-1">
-              <div
-                id="str1"
-                class="h-2 flex-1 bg-[#d0ddb8] border border-[#2d4a2d]"></div>
-              <div
-                id="str2"
-                class="h-2 flex-1 bg-[#d0ddb8] border border-[#2d4a2d]"></div>
-              <div
-                id="str3"
-                class="h-2 flex-1 bg-[#d0ddb8] border border-[#2d4a2d]"></div>
-              <div
-                id="str4"
-                class="h-2 flex-1 bg-[#d0ddb8] border border-[#2d4a2d]"></div>
+              <div id="str1" class="h-2 flex-1 bg-[#d0ddb8] border border-[#2d4a2d]"></div>
+              <div id="str2" class="h-2 flex-1 bg-[#d0ddb8] border border-[#2d4a2d]"></div>
+              <div id="str3" class="h-2 flex-1 bg-[#d0ddb8] border border-[#2d4a2d]"></div>
+              <div id="str4" class="h-2 flex-1 bg-[#d0ddb8] border border-[#2d4a2d]"></div>
             </div>
-            <p
-              id="strengthText"
-              class="text-xs text-[#4a6a4a] mt-1 text-right"></p>
+            <p id="strengthText" class="text-xs text-[#4a6a4a] mt-1 text-right"></p>
           </div>
 
           <div>
-            <label
-              class="block text-[#2d4a2d] text-sm font-bold mb-1 tracking-wider"
-              >KONFIRMASI PASSWORD:</label
-            >
+            <label class="block text-[#2d4a2d] text-sm font-bold mb-1 tracking-wider">KONFIRMASI PASSWORD:</label>
             <div class="relative">
-              <input
-                id="confirmPasswordInput"
-                type="password"
-                placeholder="Ulangi password"
-                required
-                autocomplete="new-password"
-                class="classic-input w-full px-3 py-2 text-sm text-[#2d4a2d] placeholder-[#8fb88f]" />
+              <input id="confirmPasswordInput" type="password" placeholder="Ulangi password" required autocomplete="new-password" class="classic-input w-full px-3 py-2 text-sm text-[#2d4a2d] placeholder-[#8fb88f]" />
             </div>
           </div>
 
-          <button
-            type="submit"
-            id="submitBtn"
-            class="classic-btn bg-[#2d4a2d] text-[#c8d8a8] w-full py-3 font-bold tracking-widest text-sm hover:bg-[#1a3a1a] flex justify-center items-center gap-2">
+          <button type="submit" id="submitBtn" class="classic-btn bg-[#2d4a2d] text-[#c8d8a8] w-full py-3 font-bold tracking-widest text-sm hover:bg-[#1a3a1a] flex justify-center items-center gap-2">
             <span>▶ BUAT AKUN ◀</span>
           </button>
         </form>
 
-        <div
-          class="mt-6 pt-4 border-t-2 border-[#2d4a2d] border-dashed text-center">
+        <div class="mt-6 pt-4 border-t-2 border-[#2d4a2d] border-dashed text-center">
           <p class="text-[#4a6a4a] text-xs">SUDAH PUNYA AKUN?</p>
-          <a
-            href="login.html"
-            class="text-[#2d4a2d] font-bold text-sm underline hover:text-[#1a3a1a] tracking-wider inline-block mt-1"
-            >◆ MASUK SEKARANG ◆</a
-          >
+          <a href="login.html" class="text-[#2d4a2d] font-bold text-sm underline hover:text-[#1a3a1a] tracking-wider inline-block mt-1">◆ MASUK SEKARANG ◆</a>
         </div>
       </div>
 
-      <div
-        class="bg-[#2d4a2d] py-2 text-center classic-border"
-        style="border-top: none">
-        <p class="text-[#8fb88f] text-xs tracking-wider">
-          [ FIREBASE REALTIME DATABASE ]
-          <span class="blink text-[#c8d8a8]">■</span>
-        </p>
+      <div class="bg-[#2d4a2d] py-2 text-center classic-border" style="border-top: none">
+        <p class="text-[#8fb88f] text-xs tracking-wider">[ FIREBASE REALTIME DATABASE ] <span class="blink text-[#c8d8a8]">■</span></p>
       </div>
     </div>
 
     <script type="module">
-      import {initializeApp} from "https://www.gstatic.com/firebasejs/10.7.2/firebase-app.js";
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-app.js";
       import {
         getAuth,
         createUserWithEmailAndPassword,
@@ -341,16 +203,14 @@
         const sysMsg = document.getElementById("systemErrorMsg");
         if (sysErr) {
           sysErr.classList.remove("hidden");
-          sysMsg.textContent =
-            "Terjadi kesalahan sistem. Pastikan koneksi internet aktif.";
+          sysMsg.textContent = "Terjadi kesalahan sistem. Pastikan koneksi internet aktif.";
         }
       });
 
       const firebaseConfig = {
         apiKey: "AIzaSyBTVodDUMI6wTfQj0ZtezL9cmHFR7ESzNU",
         authDomain: "web-chat-7af77.firebaseapp.com",
-        databaseURL:
-          "https://web-chat-7af77-default-rtdb.asia-southeast1.firebasedatabase.app",
+        databaseURL: "https://web-chat-7af77-default-rtdb.asia-southeast1.firebasedatabase.app",
         projectId: "web-chat-7af77",
         storageBucket: "web-chat-7af77.firebasestorage.app",
         messagingSenderId: "585530519219",
@@ -378,7 +238,7 @@
           alertBox.innerHTML = "⚠ " + msg;
           alertBox.classList.remove("hidden");
           successBox.classList.add("hidden");
-          window.scrollTo({top: 0, behavior: "smooth"});
+          window.scrollTo({ top: 0, behavior: "smooth" });
         }
 
         function showSuccess(msg) {
@@ -392,13 +252,9 @@
         const passwordInput = document.getElementById("passwordInput");
         if (togglePassword) {
           togglePassword.addEventListener("click", () => {
-            const type =
-              passwordInput.getAttribute("type") === "password"
-                ? "text"
-                : "password";
+            const type = passwordInput.getAttribute("type") === "password" ? "text" : "password";
             passwordInput.setAttribute("type", type);
-            togglePassword.textContent =
-              type === "password" ? "LIHAT" : "SEMBUNYIKAN";
+            togglePassword.textContent = type === "password" ? "LIHAT" : "SEMBUNYIKAN";
           });
         }
 
@@ -407,36 +263,25 @@
           passwordInput.addEventListener("input", () => {
             const val = passwordInput.value;
             const strengthDiv = document.getElementById("passwordStrength");
-            if (val.length === 0) {
-              strengthDiv.classList.add("hidden");
-              return;
-            }
+            if (val.length === 0) { strengthDiv.classList.add("hidden"); return; }
             strengthDiv.classList.remove("hidden");
             let score = 0;
             if (val.length >= 6) score++;
             if (val.length >= 10) score++;
             if (/[A-Z]/.test(val) && /[a-z]/.test(val)) score++;
             if (/[0-9]/.test(val) || /[^A-Za-z0-9]/.test(val)) score++;
-            const colors = [
-              "bg-[#cc4444]",
-              "bg-[#cc8844]",
-              "bg-[#cccc44]",
-              "bg-[#2d4a2d]",
-            ];
+            const colors = ["bg-[#cc4444]", "bg-[#cc8844]", "bg-[#cccc44]", "bg-[#2d4a2d]"];
             const labels = ["LEMAH", "CUKUP", "BAIK", "KUAT"];
             for (let i = 1; i <= 4; i++) {
               const el = document.getElementById("str" + i);
               if (el) {
                 el.className = "h-2 flex-1 border border-[#2d4a2d] ";
-                el.classList.add(
-                  i <= score ? colors[score - 1] : "bg-[#d0ddb8]",
-                );
+                el.classList.add(i <= score ? colors[score - 1] : "bg-[#d0ddb8]");
               }
             }
             const strengthText = document.getElementById("strengthText");
             if (strengthText) {
-              strengthText.textContent =
-                "KEKUATAN: " + (labels[score - 1] || "LEMAH");
+              strengthText.textContent = "KEKUATAN: " + (labels[score - 1] || "LEMAH");
               strengthText.style.color = score < 2 ? "#cc4444" : "#2d4a2d";
             }
           });
@@ -446,26 +291,17 @@
         const avatarInput = document.getElementById("avatarInput");
         const avatarPreview = document.getElementById("avatarPreview");
         const triggerAvatarUpload = () => avatarInput.click();
-        document
-          .getElementById("uploadAvatarBtn")
-          .addEventListener("click", triggerAvatarUpload);
-        document
-          .getElementById("changeAvatarBtn")
-          .addEventListener("click", triggerAvatarUpload);
+        document.getElementById("uploadAvatarBtn").addEventListener("click", triggerAvatarUpload);
+        document.getElementById("changeAvatarBtn").addEventListener("click", triggerAvatarUpload);
 
         if (avatarInput) {
           avatarInput.addEventListener("change", (e) => {
             const file = e.target.files[0];
             if (!file) return;
-            if (!file.type.match("image.*")) {
-              showAlert("Hanya file gambar yang diperbolehkan.");
-              return;
-            }
+            if (!file.type.match("image.*")) { showAlert("Hanya file gambar yang diperbolehkan."); return; }
             // Max 500KB for Realtime DB storage
             if (file.size > 500 * 1024) {
-              showAlert(
-                "Ukuran foto maksimal 500KB untuk disimpan di database.",
-              );
+              showAlert("Ukuran foto maksimal 500KB untuk disimpan di database.");
               return;
             }
             const reader = new FileReader();
@@ -475,19 +311,9 @@
               img.onload = () => {
                 const canvas = document.createElement("canvas");
                 const MAX = 200;
-                let w = img.width,
-                  h = img.height;
-                if (w > h) {
-                  if (w > MAX) {
-                    h = (h * MAX) / w;
-                    w = MAX;
-                  }
-                } else {
-                  if (h > MAX) {
-                    w = (w * MAX) / h;
-                    h = MAX;
-                  }
-                }
+                let w = img.width, h = img.height;
+                if (w > h) { if (w > MAX) { h = h * MAX / w; w = MAX; } }
+                else { if (h > MAX) { w = w * MAX / h; h = MAX; } }
                 canvas.width = w;
                 canvas.height = h;
                 canvas.getContext("2d").drawImage(img, 0, 0, w, h);
@@ -504,9 +330,7 @@
         const nameTagInput = document.getElementById("nameTagInput");
         if (nameTagInput) {
           nameTagInput.addEventListener("input", () => {
-            nameTagInput.value = nameTagInput.value
-              .toLowerCase()
-              .replace(/[^a-z0-9_]/g, "");
+            nameTagInput.value = nameTagInput.value.toLowerCase().replace(/[^a-z0-9_]/g, "");
           });
         }
 
@@ -515,12 +339,8 @@
         if (nameInput && nameTagInput) {
           nameInput.addEventListener("blur", () => {
             if (!nameTagInput.value) {
-              nameTagInput.value = nameInput.value
-                .toLowerCase()
-                .trim()
-                .replace(/\s+/g, "_")
-                .replace(/[^a-z0-9_]/g, "")
-                .substring(0, 20);
+              nameTagInput.value = nameInput.value.toLowerCase().trim()
+                .replace(/\s+/g, "_").replace(/[^a-z0-9_]/g, "").substring(0, 20);
             }
           });
         }
@@ -533,28 +353,12 @@
             const nameTag = nameTagInput.value.trim();
             const email = document.getElementById("emailInput").value.trim();
             const password = passwordInput.value;
-            const confirmPassword = document.getElementById(
-              "confirmPasswordInput",
-            ).value;
+            const confirmPassword = document.getElementById("confirmPasswordInput").value;
 
-            if (!name || !nameTag || !email || !password) {
-              showAlert("Semua field wajib diisi.");
-              return;
-            }
-            if (password !== confirmPassword) {
-              showAlert("Password dan konfirmasi password tidak cocok.");
-              return;
-            }
-            if (password.length < 6) {
-              showAlert("Password minimal 6 karakter.");
-              return;
-            }
-            if (!/^[a-z0-9_]+$/.test(nameTag)) {
-              showAlert(
-                "Name tag hanya boleh huruf kecil, angka, dan garis bawah.",
-              );
-              return;
-            }
+            if (!name || !nameTag || !email || !password) { showAlert("Semua field wajib diisi."); return; }
+            if (password !== confirmPassword) { showAlert("Password dan konfirmasi password tidak cocok."); return; }
+            if (password.length < 6) { showAlert("Password minimal 6 karakter."); return; }
+            if (!/^[a-z0-9_]+$/.test(nameTag)) { showAlert("Name tag hanya boleh huruf kecil, angka, dan garis bawah."); return; }
 
             const originalBtnText = submitBtn.innerHTML;
             submitBtn.innerHTML = `<span class="blink">⌛</span> MEMPROSES...`;
@@ -566,9 +370,7 @@
               const tagRef = ref(db, "nameTags/" + nameTag);
               const tagSnap = await get(tagRef);
               if (tagSnap.exists()) {
-                showAlert(
-                  `Name tag @${nameTag} sudah digunakan. Silakan pilih yang lain.`,
-                );
+                showAlert(`Name tag @${nameTag} sudah digunakan. Silakan pilih yang lain.`);
                 submitBtn.innerHTML = originalBtnText;
                 submitBtn.disabled = false;
                 submitBtn.classList.remove("opacity-75", "cursor-not-allowed");
@@ -576,30 +378,16 @@
               }
 
               // 2. Create Auth user
-              const userCredential = await createUserWithEmailAndPassword(
-                auth,
-                email,
-                password,
-              );
+              const userCredential = await createUserWithEmailAndPassword(auth, email, password);
               const user = userCredential.user;
 
-              // 3. Use base64 avatar or generated avatar URL (no Storage needed)
-              const photoURL =
-                avatarBase64 ||
-                "https://ui-avatars.com/api/?name=" +
-                  encodeURIComponent(name) +
-                  "&background=d0ddb8&color=2d4a2d&size=200&bold=true";
+              // 3. Generated URL for Firebase Auth (base64 not allowed in Auth)
+              const generatedAvatarURL = "https://ui-avatars.com/api/?name=" + encodeURIComponent(name) + "&background=d0ddb8&color=2d4a2d&size=200&bold=true";
+              // photoURL for DB: base64 if uploaded, otherwise generated URL
+              const photoURL = avatarBase64 || generatedAvatarURL;
 
-              // 4. Update Auth profile (use generated URL for Auth, base64 only in DB)
-              const authPhotoURL = avatarBase64
-                ? "https://ui-avatars.com/api/?name=" +
-                  encodeURIComponent(name) +
-                  "&background=d0ddb8&color=2d4a2d&size=200&bold=true"
-                : photoURL;
-              await updateProfile(user, {
-                displayName: name,
-                photoURL: authPhotoURL,
-              });
+              // 4. Update Auth profile — always use https URL, never base64
+              await updateProfile(user, { displayName: name, photoURL: generatedAvatarURL });
 
               // 5. Save user data to Realtime Database (photo stored as base64)
               await set(ref(db, "users/" + user.uid), {
@@ -617,22 +405,15 @@
               await set(ref(db, "nameTags/" + nameTag), user.uid);
 
               showSuccess("Akun berhasil dibuat! Mengalihkan ke chat...");
-              setTimeout(() => {
-                window.location.href = "chat.html";
-              }, 1500);
+              setTimeout(() => { window.location.href = "chat.html"; }, 1500);
             } catch (err) {
               console.error("Registration Error:", err);
               let msg = "Gagal membuat akun. Periksa koneksi internet.";
-              if (err.code === "auth/email-already-in-use")
-                msg = "Email sudah terdaftar.";
-              else if (err.code === "auth/invalid-email")
-                msg = "Format email tidak valid.";
-              else if (err.code === "auth/weak-password")
-                msg = "Password terlalu lemah (min 6 karakter).";
-              else if (err.code === "auth/network-request-failed")
-                msg = "Koneksi internet terputus.";
-              else if (err.code === "auth/too-many-requests")
-                msg = "Terlalu banyak percobaan. Coba lagi nanti.";
+              if (err.code === "auth/email-already-in-use") msg = "Email sudah terdaftar.";
+              else if (err.code === "auth/invalid-email") msg = "Format email tidak valid.";
+              else if (err.code === "auth/weak-password") msg = "Password terlalu lemah (min 6 karakter).";
+              else if (err.code === "auth/network-request-failed") msg = "Koneksi internet terputus.";
+              else if (err.code === "auth/too-many-requests") msg = "Terlalu banyak percobaan. Coba lagi nanti.";
               showAlert(msg);
               submitBtn.innerHTML = originalBtnText;
               submitBtn.disabled = false;
