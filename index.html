@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChatKlasik - Sistem Pesan Realtime Klasik</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&display=swap");
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        font-family: "Courier Prime", "Courier New", monospace;
+      }
+      .classic-border {
+        border: 2px solid #2d4a2d;
+        box-shadow: 4px 4px 0px #2d4a2d;
+      }
+      .classic-btn {
+        border: 2px solid #2d4a2d;
+        box-shadow: 3px 3px 0px #2d4a2d;
+        transition: all 0.1s;
+        cursor: pointer;
+      }
+      .classic-btn:hover {
+        transform: translate(1px, 1px);
+        box-shadow: 2px 2px 0px #2d4a2d;
+      }
+      .classic-btn:active {
+        transform: translate(3px, 3px);
+        box-shadow: none;
+      }
+      .blink {
+        animation: blink 1s step-start infinite;
+      }
+      @keyframes blink {
+        50% {
+          opacity: 0;
+        }
+      }
+      .scanline {
+        background: repeating-linear-gradient(
+          0deg,
+          transparent,
+          transparent 2px,
+          rgba(0, 0, 0, 0.03) 2px,
+          rgba(0, 0, 0, 0.03) 4px
+        );
+        pointer-events: none;
+        position: absolute;
+        inset: 0;
+      }
+      .feature-card {
+        background: #e8f0d8;
+        border: 2px solid #2d4a2d;
+        transition: all 0.2s;
+      }
+      .feature-card:hover {
+        background: #d0ddb8;
+        transform: translateY(-2px);
+        box-shadow: 4px 4px 0px #2d4a2d;
+      }
+      .hero-pattern {
+        background-image: repeating-linear-gradient(
+          45deg,
+          transparent,
+          transparent 10px,
+          rgba(45, 74, 45, 0.05) 10px,
+          rgba(45, 74, 45, 0.05) 20px
+        );
+      }
+      .typing-effect {
+        overflow: hidden;
+        border-right: 2px solid #2d4a2d;
+        white-space: nowrap;
+        animation: typing 3s steps(40, end), blink-caret 0.75s step-end infinite;
+      }
+      @keyframes typing {
+        from { width: 0 }
+        to { width: 100% }
+      }
+      @keyframes blink-caret {
+        from, to { border-color: transparent }
+        50% { border-color: #2d4a2d }
+      }
+      .float-animation {
+        animation: float 3s ease-in-out infinite;
+      }
+      @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+      }
+    </style>
+</head>
+<body class="bg-[#c8d8a8] min-h-screen relative overflow-x-hidden">
+  
+  <!-- Scanline Overlay -->
+  <div class="scanline"></div>
+
+  <!-- Background Pattern -->
+  <div class="fixed inset-0 opacity-5 pointer-events-none" style="background-image: repeating-linear-gradient(45deg, #2d4a2d 0, #2d4a2d 1px, transparent 0, transparent 50%); background-size: 20px 20px;"></div>
+
+  <!-- Header Banner -->
+  <header class="bg-[#2d4a2d] py-3 text-center relative z-10 border-b-4 border-[#1a3a1a]">
+    <div class="max-w-6xl mx-auto px-4 flex items-center justify-between">
+      <div class="text-left">
+        <h1 class="text-[#c8d8a8] font-bold text-lg tracking-widest">■ CHATKLASIK ■</h1>
+        <p class="text-[#8fb88f] text-xs tracking-wider">v1.1 | REAL-TIME MESSAGING SYSTEM</p>
+      </div>
+      <nav class="flex gap-3">
+        <a href="#fitur" class="text-[#c8d8a8] hover:text-white text-xs font-bold tracking-wider border-b-2 border-transparent hover:border-[#c8d8a8] pb-1 transition">FITUR</a>
+        <a href="#tentang" class="text-[#c8d8a8] hover:text-white text-xs font-bold tracking-wider border-b-2 border-transparent hover:border-[#c8d8a8] pb-1 transition">TENTANG</a>
+        <a href="login.html" class="classic-btn bg-[#c8d8a8] text-[#2d4a2d] px-3 py-1 text-xs font-bold">MASUK</a>
+        <a href="register.html" class="classic-btn bg-[#2d4a2d] text-[#c8d8a8] px-3 py-1 text-xs font-bold">DAFTAR</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="relative z-10 py-16 md:py-24 hero-pattern">
+    <div class="max-w-6xl mx-auto px-4">
+      <div class="grid md:grid-cols-2 gap-12 items-center">
+        
+        <!-- Left Content -->
+        <div class="space-y-6">
+          <div class="inline-block bg-[#2d4a2d] text-[#c8d8a8] px-3 py-1 text-xs font-bold tracking-wider border-2 border-[#1a3a1a]">
+            ◆ SISTEM PESAN REALTIME ◆
+          </div>
+          
+          <h2 class="text-4xl md:text-5xl font-bold text-[#2d4a2d] leading-tight tracking-wide">
+            Chat dengan Gaya<br/>
+            <span class="text-[#1a3a1a]">KLASIK!</span>
+          </h2>
+          
+          <p class="text-[#4a6a4a] text-base leading-relaxed max-w-lg">
+            Rasakan pengalaman chatting real-time dengan tampilan retro yang unik. 
+            Kirim pesan teks, gambar, buat grup, dan mention teman — semua dalam 
+            satu platform dengan estetika klasik yang tak terlupakan.
+          </p>
+
+          <div class="flex gap-4 pt-4">
+            <a href="register.html" class="classic-btn bg-[#2d4a2d] text-[#c8d8a8] px-6 py-3 font-bold tracking-widest text-sm inline-flex items-center gap-2">
+              <span>▶</span> MULAI SEKARANG
+            </a>
+            <a href="#fitur" class="classic-btn bg-[#e8f0d8] text-[#2d4a2d] px-6 py-3 font-bold tracking-widest text-sm">
+              LIHAT FITUR ▼
+            </a>
+          </div>
+
+          <!-- Stats -->
+          <div class="grid grid-cols-3 gap-4 pt-6 border-t-2 border-dashed border-[#2d4a2d] mt-6">
+            <div>
+              <p class="text-2xl font-bold text-[#2d4a2d]">∞</p>
+              <p class="text-xs text-[#4a6a4a]">Pesan Realtime</p>
+            </div>
+            <div>
+              <p class="text-2xl font-bold text-[#2d4a2d]">🔒</p>
+              <p class="text-xs text-[#4a6a4a]">Aman & Terenkripsi</p>
+            </div>
+            <div>
+              <p class="text-2xl font-bold text-[#2d4a2d]">⚡</p>
+              <p class="text-xs text-[#4a6a4a]">Super Cepat</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Content - Demo Preview -->
+        <div class="relative float-animation">
+          <div class="classic-border bg-[#e8f0d8] p-4 max-w-md mx-auto">
+            <!-- Mock Chat Window -->
+            <div class="bg-[#2d4a2d] px-3 py-2 mb-3 flex items-center gap-2">
+              <div class="w-3 h-3 rounded-full bg-[#cc4444] border border-[#8b0000]"></div>
+              <div class="w-3 h-3 rounded-full bg-[#cccc44] border border-[#888800]"></div>
+              <div class="w-3 h-3 rounded-full bg-[#44aa44] border border-[#008800]"></div>
+              <span class="text-[#c8d8a8] text-xs font-bold ml-2 tracking-wider">chat_klasik.exe</span>
+            </div>
+            
+            <div class="space-y-3 min-h-[280px]">
+              <!-- System Message -->
+              <div class="text-center">
+                <span class="msg-bubble-system text-xs px-3 py-1 inline-block" style="background: #d0ddb8; color: #4a6a4a; border: 2px dashed #4a6a4a;">
+                  Selamat datang di ChatKlasik!
+                </span>
+              </div>
+
+              <!-- Other User Message -->
+              <div class="flex justify-start gap-2">
+                <img src="https://ui-avatars.com/api/?name=Budi&background=d0ddb8&color=2d4a2d&size=32" class="w-8 h-8 border border-[#2d4a2d]" alt="avatar">
+                <div>
+                  <p class="text-xs font-bold text-[#2d4a2d]">Budi <span class="nametag-badge">@budi</span></p>
+                  <div class="msg-bubble-other px-3 py-2 text-sm" style="background: #e8f0d8; color: #2d4a2d; border: 2px solid #2d4a2d;">
+                    Hai! Apa kabar? 👋
+                  </div>
+                  <p class="text-xs text-[#4a6a4a] mt-1">10:30</p>
+                </div>
+              </div>
+
+              <!-- My Message -->
+              <div class="flex justify-end">
+                <div class="max-w-xs">
+                  <div class="msg-bubble-me px-3 py-2 text-sm" style="background: #2d4a2d; color: #e8f0d8; border: 2px solid #1a3a1a;">
+                    Baik! Ini aplikasi keren banget! 🎉
+                  </div>
+                  <p class="text-right text-xs text-[#4a6a4a] mt-1">10:31 ✓</p>
+                </div>
+              </div>
+
+              <!-- Image Message -->
+              <div class="flex justify-start gap-2">
+                <img src="https://ui-avatars.com/api/?name=Budi&background=d0ddb8&color=2d4a2d&size=32" class="w-8 h-8 border border-[#2d4a2d]" alt="avatar">
+                <div>
+                  <p class="text-xs font-bold text-[#2d4a2d]">Budi <span class="nametag-badge">@budi</span></p>
+                  <div class="border-2 border-[#2d4a2d] p-1 bg-white">
+                    <div class="w-32 h-24 bg-gradient-to-br from-[#a8c0a8] to-[#2d4a2d] flex items-center justify-center text-4xl">
+                      📷
+                    </div>
+                  </div>
+                  <p class="text-xs text-[#4a6a4a] mt-1">10:32</p>
+                </div>
+              </div>
+
+              <!-- Typing Indicator -->
+              <div class="flex justify-start gap-2">
+                <img src="https://ui-avatars.com/api/?name=Budi&background=d0ddb8&color=2d4a2d&size=32" class="w-8 h-8 border border-[#2d4a2d]" alt="avatar">
+                <div class="msg-bubble-other px-4 py-2 text-xs" style="background: #e8f0d8; color: #2d4a2d; border: 2px solid #2d4a2d;">
+                  <span class="blink">● ● ●</span> sedang mengetik...
+                </div>
+              </div>
+            </div>
+
+            <!-- Input Area Mockup -->
+            <div class="mt-3 pt-3 border-t-2 border-[#2d4a2d] flex gap-2">
+              <button class="classic-btn bg-[#c8d8a8] text-[#2d4a2d] px-2 py-1 text-xs">📷</button>
+              <input type="text" placeholder="Ketik pesan..." class="classic-input flex-1 px-2 py-1 text-xs" disabled style="background: #f0f5e8;">
+              <button class="classic-btn bg-[#2d4a2d] text-[#c8d8a8] px-3 py-1 text-xs font-bold">KIRIM ▶</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section id="fitur" class="py-16 relative z-10 bg-[#d8e8c8]">
+    <div class="max-w-6xl mx-auto px-4">
+      
+      <div class="text-center mb-12">
+        <h2 class="text-3xl font-bold text-[#2d4a2d] tracking-widest mb-3">■ FITUR UNGGULAN ■</h2>
+        <p class="text-[#4a6a4a] text-sm max-w-2xl mx-auto">
+          Semua yang Anda butuhkan untuk komunikasi modern dalam kemasan klasik yang timeless
+        </p>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-6">
+        
+        <!-- Feature 1 -->
+        <div class="feature-card p-6">
+          <div class="w-16 h-16 bg-[#2d4a2d] flex items-center justify-center text-3xl mb-4 border-2 border-[#1a3a1a]">
+            💬
+          </div>
+          <h3 class="text-[#2d4a2d] font-bold text-lg tracking-wider mb-2">PESAN PRIBADI</h3>
+          <p class="text-[#4a6a4a] text-sm leading-relaxed">
+            Kirim dan terima pesan teks secara realtime dengan pengguna lain. 
+            Dilengkapi status online/offline dan indikator terbaca.
+          </p>
+          <ul class="mt-4 space-y-2 text-xs text-[#2d4a2d]">
+            <li class="flex items-center gap-2"><span class="text-[#44aa44]">✓</span> Real-time messaging</li>
+            <li class="flex items-center gap-2"><span class="text-[#44aa44]">✓</span> Status pengguna live</li>
+            <li class="flex items-center gap-2"><span class="text-[#44aa44]">✓</span> Riwayat percakapan</li>
+          </ul>
+        </div>
+
+        <!-- Feature 2 -->
+        <div class="feature-card p-6">
+          <div class="w-16 h-16 bg-[#2d4a2d] flex items-center justify-center text-3xl mb-4 border-2 border-[#1a3a1a]">
+            👥
+          </div>
+          <h3 class="text-[#2d4a2d] font-bold text-lg tracking-wider mb-2">GRUP CHAT</h3>
+          <p class="text-[#4a6a4a] text-sm leading-relaxed">
+            Buat grup chat dengan teman-teman atau tim kerja. 
+            Tambah anggota, kelola grup, dan berkolaborasi dengan mudah.
+          </p>
+          <ul class="mt-4 space-y-2 text-xs text-[#2d4a2d]">
+            <li class="flex items-center gap-2"><span class="text-[#44aa44]">✓</span> Buat unlimited grup</li>
+            <li class="flex items-center gap-2"><span class="text-[#44aa44]">✓</span> Kelola anggota</li>
+            <li class="flex items-center gap-2"><span class="text-[#44aa44]">✓</span> Mention @anggota</li>
+          </ul>
+        </div>
+
+        <!-- Feature 3 -->
+        <div class="feature-card p-6">
+          <div class="w-16 h-16 bg-[#2d4a2d] flex items-center justify-center text-3xl mb-4 border-2 border-[#1a3a1a]">
+            📷
+          </div>
+          <h3 class="text-[#2d4a2d] font-bold text-lg tracking-wider mb-2">KIRIM GAMBAR</h3>
+          <p class="text-[#4a6a4a] text-sm leading-relaxed">
+            Bagikan momen berharga dengan mengirim gambar langsung. 
+            Gambar dioptimasi otomatis untuk performa terbaik.
+          </p>
+          <ul class="mt-4 space-y-2 text-xs text-[#2d4a2d]">
+            <li class="flex items-center gap-2"><span class="text-[#44aa44]">✓</span> Upload langsung</li>
+            <li class="flex items-center gap-2"><span class="text-[#44aa44]">✓</span> Preview sebelum kirim</li>
+            <li class="flex items-center gap-2"><span class="text-[#44aa44]">✓</span> Viewer fullscreen</li>
+          </ul>
+        </div>
+
+        <!-- Feature 4 -->
+        <div class="feature-card p-6">
+          <div class="w-16 h-16 bg-[#2d4a2d] flex items-center justify-center text-3xl mb-4 border-2 border-[#1a3a1a]">
+            🏷️
+          </div>
+          <h3 class="text-[#2d4a2d] font-bold text-lg tracking-wider mb-2">NAME TAG</h3>
+          <p class="text-[#4a6a4a] text-sm leading-relaxed">
+            Punya identitas unik dengan name tag pribadi. 
+            Mudah diingat dan digunakan untuk mention di grup.
+          </p>
+          <ul class="mt-4 space-y-2 text-xs text-[#2d4a2d]">
+            <li class="flex items-center gap-2"><span class="text-[#44aa44]">✓</span> Tag unik per user</li>
+            <li class="flex items-center gap-2"><span class="text-[#44aa44]">✓</span> Auto-complete mention</li>
+            <li class="flex items-center gap-2"><span class="text-[#44aa44]">✓</span> Highlight otomatis</li>
+          </ul>
+        </div>
+
+        <!-- Feature 5 -->
+        <div class="feature-card p-6">
+          <div class="w-16 h-16 bg-[#2d4a2d] flex items-center justify-center text-3xl mb-4 border-2 border-[#1a3a1a]">
+            👤
+          </div>
+          <h3 class="text-[#2d4a2d] font-bold text-lg tracking-wider mb-2">PROFIL LENGKAP</h3>
+          <p class="text-[#4a6a4a] text-sm leading-relaxed">
+            Personalisasi profil dengan foto, nama, dan status. 
+            Tunjukkan identitasmu kepada sesama pengguna.
+          </p>
+          <ul class="mt-4 space-y-2 text-xs text-[#2d4a2d]">
+            <li class="flex items-center gap-2"><span class="text-[#44aa44]">✓</span> Upload avatar custom</li>
+            <li class="flex items-center gap-2"><span class="text-[#44aa44]">✓</span> Status online/away/busy</li>
+            <li class="flex items-center gap-2"><span class="text-[#44aa44]">✓</span> Edit profil anytime</li>
+          </ul>
+        </div>
+
+        <!-- Feature 6 -->
+        <div class="feature-card p-6">
+          <div class="w-16 h-16 bg-[#2d4a2d] flex items-center justify-center text-3xl mb-4 border-2 border-[#1a3a1a]">
+            📱
+          </div>
+          <h3 class="text-[#2d4a2d] font-bold text-lg tracking-wider mb-2">RESPONSIF</h3>
+          <p class="text-[#4a6a4a] text-sm leading-relaxed">
+            Akses dari mana saja — desktop, tablet, atau smartphone. 
+            Tampilan menyesuaikan otomatis dengan layar perangkat.
+          </p>
+          <ul class="mt-4 space-y-2 text-xs text-[#2d4a2d]">
+            <li class="flex items-center gap-2"><span class="text-[#44aa44]">✓</span> Mobile-friendly</li>
+            <li class="flex items-center gap-2"><span class="text-[#44aa44]">✓</span> Sidebar collapsible</li>
+            <li class="flex items-center gap-2"><span class="text-[#44aa44]">✓</span> Touch optimized</li>
+          </ul>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- How It Works Section -->
+  <section class="py-16 relative z-10 bg-[#c8d8a8]">
+    <div class="max-w-4xl mx-auto px-4">
+      
+      <div class="text-center mb-12">
+        <h2 class="text-3xl font-bold text-[#2d4a2d] tracking-widest mb-3">■ CARA KERJA ■</h2>
+        <p class="text-[#4a6a4a] text-sm">Mulai chatting dalam 3 langkah mudah</p>
+      </div>
+
+      <div class="space-y-8">
+        
+        <!-- Step 1 -->
+        <div class="flex gap-6 items-start">
+          <div class="flex-shrink-0 w-16 h-16 bg-[#2d4a2d] text-[#c8d8a8] flex items-center justify-center text-2xl font-bold classic-border">
+            1
+          </div>
+          <div class="flex-1 feature-card p-5">
+            <h3 class="text-[#2d4a2d] font-bold text-lg tracking-wider mb-2">DAFTAR AKUN</h3>
+            <p class="text-[#4a6a4a] text-sm leading-relaxed">
+              Buat akun baru dengan email, password, dan name tag unik. 
+              Anda juga bisa upload foto profil untuk personalisasi. 
+              Proses registrasi cepat dan aman!
+            </p>
+            <a href="register.html" class="inline-block mt-3 classic-btn bg-[#2d4a2d] text-[#c8d8a8] px-4 py-2 text-xs font-bold">
+              ▶ DAFTAR SEKARANG
+            </a>
+          </div>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="flex gap-6 items-start">
+          <div class="flex-shrink-0 w-16 h-16 bg-[#2d4a2d] text-[#c8d8a8] flex items-center justify-center text-2xl font-bold classic-border">
+            2
+          </div>
+          <div class="flex-1 feature-card p-5">
+            <h3 class="text-[#2d4a2d] font-bold text-lg tracking-wider mb-2">MASUK & JELAJAHI</h3>
+            <p class="text-[#4a6a4a] text-sm leading-relaxed">
+              Login ke sistem dan lihat daftar pengguna lain yang sudah terdaftar. 
+              Cari teman berdasarkan nama atau name tag mereka. 
+              Lihat siapa yang sedang online!
+            </p>
+            <a href="login.html" class="inline-block mt-3 classic-btn bg-[#2d4a2d] text-[#c8d8a8] px-4 py-2 text-xs font-bold">
+              ▶ MASUK SEKARANG
+            </a>
+          </div>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="flex gap-6 items-start">
+          <div class="flex-shrink-0 w-16 h-16 bg-[#2d4a2d] text-[#c8d8a8] flex items-center justify-center text-2xl font-bold classic-border">
+            3
+          </div>
+          <div class="flex-1 feature-card p-5">
+            <h3 class="text-[#2d4a2d] font-bold text-lg tracking-wider mb-2">MULAI CHATTING!</h3>
+            <p class="text-[#4a6a4a] text-sm leading-relaxed">
+              Pilih pengguna atau buat grup baru, lalu mulai kirim pesan! 
+              Gunakan fitur mention (@nama), kirim gambar, 
+              dan nikmati pengalaman chatting real-time yang seru.
+            </p>
+            <div class="mt-3 flex gap-2 flex-wrap">
+              <span class="bg-[#d0ddb8] px-2 py-1 text-xs border border-[#2d4a2d]">💬 Pesan Teks</span>
+              <span class="bg-[#d0ddb8] px-2 py-1 text-xs border border-[#2d4a2d]">📷 Gambar</span>
+              <span class="bg-[#d0ddb8] px-2 py-1 text-xs border border-[#2d4a2d]">👥 Grup</span>
+              <span class="bg-[#d0ddb8] px-2 py-1 text-xs border border-[#2d4a2d]">🏷️ Mention</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Tech Stack / About Section -->
+  <section id="tentang" class="py-16 relative z-10 bg-[#2d4a2d]">
+    <div class="max-w-6xl mx-auto px-4">
+      
+      <div class="text-center mb-12">
+        <h2 class="text-3xl font-bold text-[#c8d8a8] tracking-widest mb-3">■ TEKNOLOGI ■</h2>
+        <p class="text-[#8fb88f] text-sm">Dibangun dengan teknologi modern dan terpercaya</p>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-8">
+        
+        <!-- Left Column - Tech Stack -->
+        <div class="bg-[#1a3a1a] p-6 classic-border" style="border-color: #1a3a1a; box-shadow: 4px 4px 0px #0a1a0a;">
+          <h3 class="text-[#c8d8a8] font-bold text-lg tracking-wider mb-4">STACK TEKNOLOGI:</h3>
+          
+          <div class="space-y-4">
+            <div class="flex items-center gap-3 bg-[#2d4a2d] p-3 border border-[#4a6a4a]">
+              <span class="text-2xl">🔥</span>
+              <div>
+                <p class="text-[#c8d8a8] font-bold text-sm">Firebase Authentication</p>
+                <p class="text-[#8fb88f] text-xs">Autentikasi user yang aman & reliable</p>
+              </div>
+            </div>
+            
+            <div class="flex items-center gap-3 bg-[#2d4a2d] p-3 border border-[#4a6a4a]">
+              <span class="text-2xl">💾</span>
+              <div>
+                <p class="text-[#c8d8a8] font-bold text-sm">Firebase Realtime Database</p>
+                <p class="text-[#8fb88f] text-xs">Sinkronisasi data realtime instan</p>
+              </div>
+            </div>
+            
+            <div class="flex items-center gap-3 bg-[#2d4a2d] p-3 border border-[#4a6a4a]">
+              <span class="text-2xl">🎨</span>
+              <div>
+                <p class="text-[#c8d8a8] font-bold text-sm">Tailwind CSS</p>
+                <p class="text-[#8fb88f] text-xs">Styling utility-first yang powerful</p>
+              </div>
+            </div>
+            
+            <div class="flex items-center gap-3 bg-[#2d4a2d] p-3 border border-[#4a6a4a]">
+              <span class="text-2xl">⚡</span>
+              <div>
+                <p class="text-[#c8d8a8] font-bold text-sm">Vanilla JavaScript (ES6+)</p>
+                <p class="text-[#8fb88f] text-xs">Performa optimal tanpa framework berat</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Column - Info -->
+        <div class="space-y-6">
+          <div class="bg-[#1a3a1a] p-6 classic-border" style="border-color: #1a3a1a; box-shadow: 4px 4px 0px #0a1a0a;">
+            <h3 class="text-[#c8d8a8] font-bold text-lg tracking-wider mb-4">■ INFORMASI SISTEM ■</h3>
+            
+            <table class="w-full text-sm">
+              <tbody>
+                <tr class="border-b border-[#4a6a4a]">
+                  <td class="py-2 text-[#8fb88f] pr-4">Versi:</td>
+                  <td class="py-2 text-[#c8d8a8] font-bold">v1.1.0</td>
+                </tr>
+                <tr class="border-b border-[#4a6a4a]">
+                  <td class="py-2 text-[#8fb88f] pr-4">Status:</td>
+                  <td class="py-2 text-[#44aa44] font-bold">● ONLINE</td>
+                </tr>
+                <tr class="border-b border-[#4a6a4a]">
+                  <td class="py-2 text-[#8fb88f] pr-4">Database:</td>
+                  <td class="py-2 text-[#c8d8a8]">Firebase RTDB</td>
+                </tr>
+                <tr class="border-b border-[#4a6a4a]">
+                  <td class="py-2 text-[#8fb88f] pr-4">Region:</td>
+                  <td class="py-2 text-[#c8d8a8]">Asia Southeast 1</td>
+                </tr>
+                <tr>
+                  <td class="py-2 text-[#8fb88f] pr-4">Uptime:</td>
+                  <td class="py-2 text-[#c8d8a8]">99.9%</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="bg-[#1a3a1a] p-6 classic-border" style="border-color: #1a3a1a; box-shadow: 4px 4px 0px #0a1a0a;">
+            <h3 class="text-[#c8d8a8] font-bold text-lg tracking-wider mb-4">■ KEAMANAN ■</h3>
+            <ul class="space-y-2 text-sm text-[#8fb88f]">
+              <li class="flex items-start gap-2">
+                <span class="text-[#44aa44] mt-1">◆</span>
+                <span>Autentikasi Firebase dengan enkripsi end-to-end</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-[#44aa44] mt-1">◆</span>
+                <span>Validasi input di client & server side</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-[#44aa44] mt-1">◆</span>
+                <span>Sanitasi HTML untuk mencegah XSS</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-[#44aa44] mt-1">◆</span>
+                <span>Rules database yang ketat</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="py-16 relative z-10 bg-[#d8e8c8]">
+    <div class="max-w-3xl mx-auto px-4 text-center">
+      
+      <div class="classic-border bg-[#e8f0d8] p-8 md:p-12">
+        <div class="text-5xl mb-4">🚀</div>
+        <h2 class="text-3xl font-bold text-[#2d4a2d] tracking-widest mb-4">
+          SIAP MULAI CHATTING?
+        </h2>
+        <p class="text-[#4a6a4a] text-base mb-8 max-w-xl mx-auto">
+          Bergabunglah dengan ribuan pengguna yang sudah merasakan pengalaman 
+          chatting klasik yang menyenangkan. Gratis tanpa biaya!
+        </p>
+        
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+          <a href="register.html" class="classic-btn bg-[#2d4a2d] text-[#c8d8a8] px-8 py-4 font-bold tracking-widest text-base inline-flex items-center justify-center gap-2">
+            <span>▶</span> BUAT AKUN GRATIS
+          </a>
+          <a href="login.html" class="classic-btn bg-[#c8d8a8] text-[#2d4a2d] px-8 py-4 font-bold tracking-widest text-base">
+            SUDAH PUNYA AKUN? MASUK
+          </a>
+        </div>
+
+        <p class="text-[#8fb88f] text-xs mt-6">
+          <span class="blink">■</span> Tidak memerlukan instalasi • Akses langsung dari browser • 100% Gratis <span class="blink">■</span>
+        </p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="bg-[#2d4a2d] py-8 relative z-10 border-t-4 border-[#1a3a1a]">
+    <div class="max-w-6xl mx-auto px-4">
+      
+      <div class="grid md:grid-cols-3 gap-8 mb-8">
+        
+        <!-- Brand -->
+        <div>
+          <h3 class="text-[#c8d8a8] font-bold text-lg tracking-widest mb-3">■ CHATKLASIK ■</h3>
+          <p class="text-[#8fb88f] text-xs leading-relaxed">
+            Sistem pesan real-time dengan tampilan klasik yang timeless. 
+            Dibuat dengan ❤️ menggunakan teknologi web modern.
+          </p>
+        </div>
+
+        <!-- Quick Links -->
+        <div>
+          <h4 class="text-[#c8d8a8] font-bold text-sm tracking-wider mb-3">LINK CEPAT:</h4>
+          <ul class="space-y-2 text-xs">
+            <li><a href="login.html" class="text-[#8fb88f] hover:text-[#c8d8a8] transition">→ Masuk</a></li>
+            <li><a href="register.html" class="text-[#8fb88f] hover:text-[#c8d8a8] transition">→ Daftar Akun</a></li>
+            <li><a href="#fitur" class="text-[#8fb88f] hover:text-[#c8d8a8] transition">→ Fitur</a></li>
+            <li><a href="#tentang" class="text-[#8fb88f] hover:text-[#c8d8a8] transition">→ Tentang</a></li>
+          </ul>
+        </div>
+
+        <!-- System Info -->
+        <div>
+          <h4 class="text-[#c8d8a8] font-bold text-sm tracking-wider mb-3">SISTEM INFO:</h4>
+          <ul class="space-y-2 text-xs text-[#8fb88f]">
+            <li class="flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-[#44aa44] status-online"></span>
+              Server Status: ONLINE
+            </li>
+            <li>Version: v1.1.0</li>
+            <li>Last Update: 2024</li>
+            <li>Powered by Firebase</li>
+          </ul>
+        </div>
+
+      </div>
+
+      <!-- Bottom Bar -->
+      <div class="border-t border-[#4a6a4a] pt-6 flex flex-col md:flex-row items-center justify-between gap-4">
+        <p class="text-[#8fb88f] text-xs text-center md:text-left">
+          © 2024 ChatKlasik. All rights reserved.<br class="md:hidden"/>
+          Built with Firebase & Tailwind CSS.
+        </p>
+        <div class="flex items-center gap-4 text-xs text-[#8fb88f]">
+          <span class="tracking-wider">[ FIREBASE REALTIME DATABASE ]</span>
+          <span class="blink text-[#c8d8a8]">■</span>
+        </div>
+      </div>
+
+    </div>
+  </footer>
+
+  <!-- Mobile Menu Button (visible on small screens) -->
+  <button id="mobileMenuToggle" class="md:hidden fixed bottom-6 right-6 classic-btn bg-[#2d4a2d] text-[#c8d8a8] px-4 py-3 text-sm font-bold z-50 shadow-lg">
+    ☰ MENU
+  </button>
+
+  <!-- Mobile Navigation Overlay -->
+  <div id="mobileNavOverlay" class="hidden fixed inset-0 bg-black bg-opacity-75 z-50 md:hidden">
+    <div class="absolute right-0 top-0 bottom-0 w-72 bg-[#d8e8c8] border-l-4 border-[#2d4a2d] p-6">
+      <div class="flex justify-between items-center mb-8">
+        <h3 class="text-[#2d4a2d] font-bold tracking-widest">■ MENU ■</h3>
+        <button id="closeMobileNav" class="text-[#2d4a2d] text-2xl font-bold">✕</button>
+      </div>
+      <nav class="space-y-4">
+        <a href="#" class="block text-[#2d4a2d] font-bold text-sm border-b-2 border-[#2d4a2d] pb-2">BERANDA</a>
+        <a href="#fitur" class="block text-[#2d4a2d] font-bold text-sm border-b-2 border-[#2d4a2d] pb-2">FITUR</a>
+        <a href="#tentang" class="block text-[#2d4a2d] font-bold text-sm border-b-2 border-[#2d4a2d] pb-2">TENTANG</a>
+        <a href="login.html" class="block classic-btn bg-[#c8d8a8] text-[#2d4a2d] px-4 py-2 text-xs font-bold mt-4">MASUK</a>
+        <a href="register.html" class="block classic-btn bg-[#2d4a2d] text-[#c8d8a8] px-4 py-2 text-xs font-bold mt-2">DAFTAR</a>
+      </nav>
+    </div>
+  </div>
+
+  <script>
+    // Mobile Navigation Toggle
+    const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+    const mobileNavOverlay = document.getElementById('mobileNavOverlay');
+    const closeMobileNav = document.getElementById('closeMobileNav');
+
+    if (mobileMenuToggle && mobileNavOverlay) {
+      mobileMenuToggle.addEventListener('click', () => {
+        mobileNavOverlay.classList.remove('hidden');
+      });
+
+      if (closeMobileNav) {
+        closeMobileNav.addEventListener('click', () => {
+          mobileNavOverlay.classList.add('hidden');
+        });
+      }
+
+      mobileNavOverlay.addEventListener('click', (e) => {
+        if (e.target === mobileNavOverlay) {
+          mobileNavOverlay.classList.add('hidden');
+        }
+      });
+    }
+
+    // Smooth scroll for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+          });
+          // Close mobile nav if open
+          if (mobileNavOverlay) {
+            mobileNavOverlay.classList.add('hidden');
+          }
+        }
+      });
+    });
+  </script>
+
+</body>
+</html>
