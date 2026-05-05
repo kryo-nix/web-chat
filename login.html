@@ -1,0 +1,440 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login - ChatKlasik</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&display=swap");
+      body {
+        font-family: "Courier Prime", "Courier New", monospace;
+      }
+      .classic-border {
+        border: 2px solid #2d4a2d;
+        box-shadow: 4px 4px 0px #2d4a2d;
+      }
+      .classic-btn {
+        border: 2px solid #2d4a2d;
+        box-shadow: 3px 3px 0px #2d4a2d;
+        transition: all 0.1s;
+      }
+      .classic-btn:hover {
+        transform: translate(1px, 1px);
+        box-shadow: 2px 2px 0px #2d4a2d;
+      }
+      .classic-btn:active {
+        transform: translate(3px, 3px);
+        box-shadow: none;
+      }
+      .classic-input {
+        border: 2px solid #2d4a2d;
+        background: #f0f5e8;
+      }
+      .classic-input:focus {
+        outline: none;
+        background: #ffffff;
+        border-color: #1a3a1a;
+      }
+      .blink {
+        animation: blink 1s step-start infinite;
+      }
+      @keyframes blink {
+        50% {
+          opacity: 0;
+        }
+      }
+      .scanline {
+        background: repeating-linear-gradient(
+          0deg,
+          transparent,
+          transparent 2px,
+          rgba(0, 0, 0, 0.03) 2px,
+          rgba(0, 0, 0, 0.03) 4px
+        );
+        pointer-events: none;
+      }
+    </style>
+  </head>
+  <body
+    class="min-h-screen bg-[#c8d8a8] flex items-center justify-center p-4 relative overflow-hidden">
+    <div class="absolute inset-0 scanline"></div>
+    <div
+      class="absolute inset-0 opacity-10"
+      style="
+        background-image: repeating-linear-gradient(
+          45deg,
+          #2d4a2d 0,
+          #2d4a2d 1px,
+          transparent 0,
+          transparent 50%
+        );
+        background-size: 20px 20px;
+      "></div>
+
+    <!-- Header Banner -->
+    <div
+      class="absolute top-0 left-0 right-0 bg-[#2d4a2d] py-2 text-center z-10">
+      <p class="text-[#c8d8a8] text-xs tracking-widest font-bold">
+        ◆ CHATKLASIK v1.1 ◆ REAL-TIME MESSAGING SYSTEM ◆
+      </p>
+    </div>
+
+    <!-- System Error Notification -->
+    <div
+      id="systemError"
+      class="hidden fixed top-16 left-1/2 transform -translate-x-1/2 bg-red-100 border-2 border-red-800 text-red-900 px-4 py-2 z-50 max-w-sm text-center shadow-lg">
+      <p class="font-bold">SYSTEM ERROR</p>
+      <p id="systemErrorMsg" class="text-xs">Gagal memuat modul sistem.</p>
+    </div>
+
+    <div class="w-full max-w-md mt-8 z-10">
+      <!-- Title Card -->
+      <div
+        class="bg-[#2d4a2d] text-center py-3 mb-0 classic-border"
+        style="border-bottom: none">
+        <h1 class="text-[#c8d8a8] text-2xl font-bold tracking-widest">
+          ■ CHATKLASIK ■
+        </h1>
+        <p class="text-[#8fb88f] text-xs tracking-wider mt-1">
+          [ SISTEM PESAN REALTIME ]
+        </p>
+      </div>
+
+      <!-- Login Form -->
+      <div class="bg-[#e8f0d8] classic-border p-6">
+        <div class="border-b-2 border-[#2d4a2d] mb-4 pb-2">
+          <h2 class="text-[#2d4a2d] font-bold text-lg tracking-widest">
+            ▶ MASUK KE SISTEM
+          </h2>
+          <p class="text-[#4a6a4a] text-xs mt-1">
+            Silakan masukkan kredensial Anda
+          </p>
+        </div>
+
+        <div
+          id="alertBox"
+          class="hidden mb-4 p-3 border-2 border-[#8b0000] bg-[#ffe8e8] text-[#8b0000] text-sm break-words"></div>
+        <div
+          id="successBox"
+          class="hidden mb-4 p-3 border-2 border-[#2d4a2d] bg-[#e8f5e8] text-[#2d4a2d] text-sm"></div>
+
+        <form id="loginForm" class="space-y-4">
+          <div>
+            <label
+              class="block text-[#2d4a2d] text-sm font-bold mb-1 tracking-wider"
+              >EMAIL:</label
+            >
+            <input
+              id="emailInput"
+              type="email"
+              placeholder="user@email.com"
+              required
+              autocomplete="email"
+              class="classic-input w-full px-3 py-2 text-sm text-[#2d4a2d] placeholder-[#8fb88f]" />
+          </div>
+
+          <div>
+            <label
+              class="block text-[#2d4a2d] text-sm font-bold mb-1 tracking-wider"
+              >PASSWORD:</label
+            >
+            <div class="relative">
+              <input
+                id="passwordInput"
+                type="password"
+                placeholder="••••••••"
+                required
+                autocomplete="current-password"
+                class="classic-input w-full px-3 py-2 text-sm text-[#2d4a2d] placeholder-[#8fb88f]" />
+              <button
+                type="button"
+                id="togglePassword"
+                class="absolute right-2 top-1/2 -translate-y-1/2 text-[#4a6a4a] text-xs hover:text-[#2d4a2d] font-bold underline decoration-dotted">
+                LIHAT
+              </button>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between">
+            <label
+              class="flex items-center gap-2 text-xs text-[#4a6a4a] cursor-pointer select-none">
+              <input
+                type="checkbox"
+                id="rememberMe"
+                class="w-3 h-3"
+                style="accent-color: #2d4a2d" />
+              INGAT SAYA
+            </label>
+            <button
+              type="button"
+              id="forgotPasswordBtn"
+              class="text-xs text-[#2d4a2d] underline hover:text-[#1a3a1a] font-bold">
+              LUPA PASSWORD?
+            </button>
+          </div>
+
+          <button
+            type="submit"
+            id="submitBtn"
+            class="classic-btn bg-[#2d4a2d] text-[#c8d8a8] w-full py-2 font-bold tracking-widest text-sm hover:bg-[#1a3a1a]">
+            ▶ MASUK ◀
+          </button>
+        </form>
+
+        <div
+          class="mt-4 pt-4 border-t-2 border-[#2d4a2d] border-dashed text-center">
+          <p class="text-[#4a6a4a] text-xs">BELUM PUNYA AKUN?</p>
+          <a
+            href="register.html"
+            class="text-[#2d4a2d] font-bold text-sm underline hover:text-[#1a3a1a] tracking-wider inline-block mt-1"
+            >◆ DAFTAR SEKARANG ◆</a
+          >
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div
+        class="bg-[#2d4a2d] py-2 text-center classic-border"
+        style="border-top: none">
+        <p class="text-[#8fb88f] text-xs tracking-wider">
+          [ FIREBASE REALTIME DATABASE ]
+          <span class="blink text-[#c8d8a8]">■</span>
+        </p>
+      </div>
+    </div>
+
+    <!-- Forgot Password Modal -->
+    <div
+      id="forgotModal"
+      class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4">
+      <div class="w-full max-w-sm relative">
+        <div
+          class="bg-[#2d4a2d] py-2 px-4 classic-border"
+          style="border-bottom: none">
+          <h3 class="text-[#c8d8a8] font-bold tracking-widest text-sm">
+            ■ RESET PASSWORD ■
+          </h3>
+        </div>
+        <div class="bg-[#e8f0d8] classic-border p-5">
+          <p class="text-[#4a6a4a] text-xs mb-4 leading-relaxed">
+            Masukkan email Anda. Kami akan mengirimkan link untuk mereset
+            password Anda.
+          </p>
+          <div
+            id="forgotAlertBox"
+            class="hidden mb-3 p-2 border-2 border-[#8b0000] bg-[#ffe8e8] text-[#8b0000] text-xs break-words"></div>
+          <div
+            id="forgotSuccessBox"
+            class="hidden mb-3 p-2 border-2 border-[#2d4a2d] bg-[#e8f5e8] text-[#2d4a2d] text-xs break-words"></div>
+          <label
+            class="block text-[#2d4a2d] text-xs font-bold mb-1 tracking-wider"
+            >EMAIL:</label
+          >
+          <input
+            id="forgotEmailInput"
+            type="email"
+            placeholder="user@email.com"
+            autocomplete="email"
+            class="classic-input w-full px-3 py-2 text-sm text-[#2d4a2d] placeholder-[#8fb88f] mb-4" />
+          <div class="flex gap-3">
+            <button
+              id="sendResetBtn"
+              class="classic-btn bg-[#2d4a2d] text-[#c8d8a8] flex-1 py-2 font-bold text-xs tracking-wider hover:bg-[#1a3a1a]">
+              ▶ KIRIM LINK
+            </button>
+            <button
+              id="closeForgotBtn"
+              class="classic-btn bg-[#c8d8a8] text-[#2d4a2d] flex-1 py-2 font-bold text-xs tracking-wider">
+              ✕ BATAL
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script type="module">
+      import {initializeApp} from "https://www.gstatic.com/firebasejs/10.7.2/firebase-app.js";
+      import {
+        getAuth,
+        signInWithEmailAndPassword,
+        sendPasswordResetEmail,
+        onAuthStateChanged,
+      } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-auth.js";
+
+      window.addEventListener("error", function (e) {
+        console.error("Global Error:", e);
+        const sysErr = document.getElementById("systemError");
+        const sysMsg = document.getElementById("systemErrorMsg");
+        if (sysErr) {
+          sysErr.classList.remove("hidden");
+          sysMsg.textContent =
+            "Gagal memuat modul login. Pastikan internet aktif.";
+        }
+      });
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyBTVodDUMI6wTfQj0ZtezL9cmHFR7ESzNU",
+        authDomain: "web-chat-7af77.firebaseapp.com",
+        databaseURL:
+          "https://web-chat-7af77-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "web-chat-7af77",
+        storageBucket: "web-chat-7af77.firebasestorage.app",
+        messagingSenderId: "585530519219",
+        appId: "1:585530519219:web:f8595bdba2de25f1128ac6",
+        measurementId: "G-HG5N03TYNG",
+      };
+
+      try {
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        onAuthStateChanged(auth, (user) => {
+          if (user) window.location.href = "chat.html";
+        });
+
+        const alertBox = document.getElementById("alertBox");
+        const successBox = document.getElementById("successBox");
+        const loginForm = document.getElementById("loginForm");
+        const submitBtn = document.getElementById("submitBtn");
+        const forgotModal = document.getElementById("forgotModal");
+
+        function showAlert(msg) {
+          alertBox.innerHTML = "⚠ " + msg;
+          alertBox.classList.remove("hidden");
+          successBox.classList.add("hidden");
+          window.scrollTo({top: 0, behavior: "smooth"});
+        }
+
+        function showSuccess(msg) {
+          successBox.textContent = "✓ " + msg;
+          successBox.classList.remove("hidden");
+          alertBox.classList.add("hidden");
+        }
+
+        // Toggle Password Visibility
+        const togglePassword = document.getElementById("togglePassword");
+        const passwordInput = document.getElementById("passwordInput");
+        if (togglePassword) {
+          togglePassword.addEventListener("click", () => {
+            const type =
+              passwordInput.getAttribute("type") === "password"
+                ? "text"
+                : "password";
+            passwordInput.setAttribute("type", type);
+            togglePassword.textContent =
+              type === "password" ? "LIHAT" : "SEMBUNYIKAN";
+          });
+        }
+
+        // Login Logic
+        if (loginForm) {
+          loginForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const email = document.getElementById("emailInput").value.trim();
+            const password = passwordInput.value;
+            if (!email || !password) {
+              showAlert("Email dan password harus diisi.");
+              return;
+            }
+
+            const originalBtnText = submitBtn.innerHTML;
+            submitBtn.innerHTML = `<span class="blink">⌛</span> MEMPROSES...`;
+            submitBtn.disabled = true;
+            submitBtn.classList.add("opacity-75", "cursor-not-allowed");
+
+            try {
+              await signInWithEmailAndPassword(auth, email, password);
+              showSuccess("Login berhasil! Mengalihkan...");
+              setTimeout(() => {
+                window.location.href = "chat.html";
+              }, 1000);
+            } catch (err) {
+              console.error("Login Error:", err);
+              let msg = "Terjadi kesalahan saat login.";
+              if (err.code === "auth/user-not-found")
+                msg = "Email ini belum terdaftar.";
+              else if (err.code === "auth/wrong-password")
+                msg = "Password salah.";
+              else if (err.code === "auth/invalid-email")
+                msg = "Format email salah.";
+              else if (err.code === "auth/too-many-requests")
+                msg = "Terlalu banyak percobaan gagal. Coba lagi nanti.";
+              else if (err.code === "auth/invalid-credential")
+                msg = "Email atau password salah.";
+              showAlert(msg);
+              submitBtn.innerHTML = originalBtnText;
+              submitBtn.disabled = false;
+              submitBtn.classList.remove("opacity-75", "cursor-not-allowed");
+            }
+          });
+        }
+
+        // Forgot Password
+        const forgotAlertBox = document.getElementById("forgotAlertBox");
+        const forgotSuccessBox = document.getElementById("forgotSuccessBox");
+        const forgotEmailInput = document.getElementById("forgotEmailInput");
+
+        document
+          .getElementById("forgotPasswordBtn")
+          .addEventListener("click", () => {
+            forgotModal.classList.remove("hidden");
+            forgotAlertBox.classList.add("hidden");
+            forgotSuccessBox.classList.add("hidden");
+            forgotEmailInput.value = "";
+          });
+
+        document
+          .getElementById("closeForgotBtn")
+          .addEventListener("click", () => {
+            forgotModal.classList.add("hidden");
+          });
+
+        document
+          .getElementById("sendResetBtn")
+          .addEventListener("click", async () => {
+            const email = forgotEmailInput.value.trim();
+            if (!email) {
+              forgotAlertBox.textContent = "⚠ Masukkan email terlebih dahulu.";
+              forgotAlertBox.classList.remove("hidden");
+              forgotSuccessBox.classList.add("hidden");
+              return;
+            }
+            const btn = document.getElementById("sendResetBtn");
+            const originalBtnText = btn.textContent;
+            btn.textContent = "⌛ MENGIRIM...";
+            btn.disabled = true;
+            try {
+              await sendPasswordResetEmail(auth, email);
+              forgotSuccessBox.innerHTML = `✓ Link reset dikirim ke <b>${email}</b>.<br>Periksa inbox/spam Anda!`;
+              forgotSuccessBox.classList.remove("hidden");
+              forgotAlertBox.classList.add("hidden");
+            } catch (err) {
+              let msg = "Gagal mengirim email reset.";
+              if (err.code === "auth/user-not-found")
+                msg = "Email ini tidak terdaftar di sistem kami.";
+              else if (err.code === "auth/invalid-email")
+                msg = "Format email salah.";
+              forgotAlertBox.textContent = "⚠ " + msg;
+              forgotAlertBox.classList.remove("hidden");
+              forgotSuccessBox.classList.add("hidden");
+              btn.textContent = originalBtnText;
+              btn.disabled = false;
+            }
+          });
+
+        forgotModal.addEventListener("click", (e) => {
+          if (e.target === forgotModal) forgotModal.classList.add("hidden");
+        });
+      } catch (initError) {
+        console.error("Inisialisasi Firebase Gagal:", initError);
+        const sysErr = document.getElementById("systemError");
+        const sysMsg = document.getElementById("systemErrorMsg");
+        if (sysErr) {
+          sysErr.classList.remove("hidden");
+          sysMsg.textContent = "Gagal memuat Firebase: " + initError.message;
+        }
+      }
+    </script>
+  </body>
+</html>
