@@ -1,1553 +1,1968 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="id">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ChatKlasik</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&display=swap');
-    * { box-sizing: border-box; }
-    body { font-family: 'Courier Prime', 'Courier New', monospace; overflow: hidden; height: 100dvh; }
-    .classic-border { border: 2px solid #2d4a2d; box-shadow: 3px 3px 0px #2d4a2d; }
-    .classic-btn { border: 2px solid #2d4a2d; box-shadow: 2px 2px 0px #2d4a2d; transition: all 0.1s; cursor: pointer; }
-    .classic-btn:hover { transform: translate(1px, 1px); box-shadow: 1px 1px 0px #2d4a2d; }
-    .classic-btn:active { transform: translate(2px, 2px); box-shadow: none; }
-    .classic-input { border: 2px solid #2d4a2d; background: #f0f5e8; }
-    .classic-input:focus { outline: none; background: #fff; border-color: #1a3a1a; }
-    .blink { animation: blink 1s step-start infinite; }
-    @keyframes blink { 50% { opacity: 0; } }
-    .msg-bubble-me { background: #2d4a2d; color: #e8f0d8; border: 2px solid #1a3a1a; }
-    .msg-bubble-other { background: #e8f0d8; color: #2d4a2d; border: 2px solid #2d4a2d; }
-    .msg-bubble-system { background: #d0ddb8; color: #4a6a4a; border: 2px dashed #4a6a4a; }
-    .chat-item { border-bottom: 1px solid #2d4a2d; cursor: pointer; transition: background 0.1s; }
-    .chat-item:hover { background: #d0ddb8; }
-    .chat-item.active { background: #b8ccb8; border-left: 4px solid #2d4a2d; }
-    .status-online { background: #44aa44; box-shadow: 0 0 6px #44aa44; }
-    .status-offline { background: #888888; }
-    #chatArea { display: flex; flex-direction: column; height: 100%; }
-    #messagesContainer { flex: 1; overflow-y: auto; padding: 12px; }
-    #messagesContainer::-webkit-scrollbar { width: 8px; }
-    #messagesContainer::-webkit-scrollbar-track { background: #c8d8a8; border: 1px solid #2d4a2d; }
-    #messagesContainer::-webkit-scrollbar-thumb { background: #2d4a2d; }
-    #sidebarLeft::-webkit-scrollbar { width: 6px; }
-    #sidebarLeft::-webkit-scrollbar-track { background: #c8d8a8; }
-    #sidebarLeft::-webkit-scrollbar-thumb { background: #2d4a2d; }
-    .tab-btn { border-bottom: none; cursor: pointer; }
-    .tab-btn.active { background: #2d4a2d; color: #c8d8a8; }
-    .tab-btn:not(.active) { background: #a8c0a8; color: #2d4a2d; }
-    .mention-highlight { background: #c8d8a8; color: #1a3a1a; font-weight: bold; padding: 0 2px; border: 1px solid #2d4a2d; }
-    .mention-suggestion { background: #e8f0d8; border: 1px solid #2d4a2d; cursor: pointer; padding: 4px 8px; }
-    .mention-suggestion:hover { background: #d0ddb8; }
-    .img-msg { max-width: 200px; max-height: 200px; object-fit: cover; border: 2px solid #2d4a2d; cursor: pointer; display: block; }
-    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 100; display: flex; align-items: center; justify-content: center; }
-    .panel { height: 100dvh; display: flex; flex-direction: column; }
-    #sidebarLeft { overflow-y: auto; flex: 1; }
-    .scanline-light {
-      background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.02) 2px, rgba(0,0,0,0.02) 4px);
-      pointer-events: none; position: absolute; inset: 0;
-    }
-    @media (max-width: 768px) {
-      #leftPanel { position: fixed; left: -100%; top: 0; bottom: 0; width: 80%; z-index: 50; transition: left 0.2s; }
-      #leftPanel.open { left: 0; }
-      #rightPanel { display: none; }
-      #rightPanel.open { display: flex; position: fixed; right: 0; top: 0; bottom: 0; width: 80%; z-index: 50; }
-    }
-    .nametag-badge { background: #2d4a2d; color: #c8d8a8; font-size: 10px; padding: 1px 4px; border: 1px solid #1a3a1a; }
-    .unread-badge { background: #cc4444; color: white; font-size: 10px; min-width: 18px; height: 18px; border-radius: 0; display: flex; align-items: center; justify-content: center; border: 1px solid #8b0000; font-weight: bold; }
-  </style>
-</head>
-<body class="bg-[#c8d8a8] flex" style="height:100dvh; overflow:hidden;">
-
-  <!-- ===== LEFT PANEL ===== -->
-  <div id="leftPanel" class="panel bg-[#d8e8c8] border-r-2 border-[#2d4a2d]" style="width:280px; min-width:280px; flex-shrink:0;">
-    <!-- Header -->
-    <div class="bg-[#2d4a2d] px-3 py-2 flex items-center justify-between flex-shrink-0">
-      <div>
-        <h1 class="text-[#c8d8a8] font-bold text-sm tracking-widest">■ CHATKLASIK</h1>
-        <p class="text-[#8fb88f] text-xs" id="headerStatus">Memuat...</p>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ChatKlasik</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&display=swap");
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        font-family: "Courier Prime", "Courier New", monospace;
+        overflow: hidden;
+        height: 100dvh;
+      }
+      .classic-border {
+        border: 2px solid #2d4a2d;
+        box-shadow: 3px 3px 0px #2d4a2d;
+      }
+      .classic-btn {
+        border: 2px solid #2d4a2d;
+        box-shadow: 2px 2px 0px #2d4a2d;
+        transition: all 0.1s;
+        cursor: pointer;
+      }
+      .classic-btn:hover {
+        transform: translate(1px, 1px);
+        box-shadow: 1px 1px 0px #2d4a2d;
+      }
+      .classic-btn:active {
+        transform: translate(2px, 2px);
+        box-shadow: none;
+      }
+      .classic-input {
+        border: 2px solid #2d4a2d;
+        background: #f0f5e8;
+      }
+      .classic-input:focus {
+        outline: none;
+        background: #fff;
+        border-color: #1a3a1a;
+      }
+      .blink {
+        animation: blink 1s step-start infinite;
+      }
+      @keyframes blink {
+        50% {
+          opacity: 0;
+        }
+      }
+      .msg-bubble-me {
+        background: #2d4a2d;
+        color: #e8f0d8;
+        border: 2px solid #1a3a1a;
+      }
+      .msg-bubble-other {
+        background: #e8f0d8;
+        color: #2d4a2d;
+        border: 2px solid #2d4a2d;
+      }
+      .msg-bubble-system {
+        background: #d0ddb8;
+        color: #4a6a4a;
+        border: 2px dashed #4a6a4a;
+      }
+      .chat-item {
+        border-bottom: 1px solid #2d4a2d;
+        cursor: pointer;
+        transition: background 0.1s;
+      }
+      .chat-item:hover {
+        background: #d0ddb8;
+      }
+      .chat-item.active {
+        background: #b8ccb8;
+        border-left: 4px solid #2d4a2d;
+      }
+      .status-online {
+        background: #44aa44;
+        box-shadow: 0 0 6px #44aa44;
+      }
+      .status-offline {
+        background: #888888;
+      }
+      #chatArea {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+      }
+      #messagesContainer {
+        flex: 1;
+        overflow-y: auto;
+        padding: 12px;
+      }
+      #messagesContainer::-webkit-scrollbar {
+        width: 8px;
+      }
+      #messagesContainer::-webkit-scrollbar-track {
+        background: #c8d8a8;
+        border: 1px solid #2d4a2d;
+      }
+      #messagesContainer::-webkit-scrollbar-thumb {
+        background: #2d4a2d;
+      }
+      #sidebarLeft::-webkit-scrollbar {
+        width: 6px;
+      }
+      #sidebarLeft::-webkit-scrollbar-track {
+        background: #c8d8a8;
+      }
+      #sidebarLeft::-webkit-scrollbar-thumb {
+        background: #2d4a2d;
+      }
+      .tab-btn {
+        border-bottom: none;
+        cursor: pointer;
+      }
+      .tab-btn.active {
+        background: #2d4a2d;
+        color: #c8d8a8;
+      }
+      .tab-btn:not(.active) {
+        background: #a8c0a8;
+        color: #2d4a2d;
+      }
+      .mention-highlight {
+        background: #c8d8a8;
+        color: #1a3a1a;
+        font-weight: bold;
+        padding: 0 2px;
+        border: 1px solid #2d4a2d;
+      }
+      .mention-suggestion {
+        background: #e8f0d8;
+        border: 1px solid #2d4a2d;
+        cursor: pointer;
+        padding: 4px 8px;
+      }
+      .mention-suggestion:hover {
+        background: #d0ddb8;
+      }
+      .img-msg {
+        max-width: 200px;
+        max-height: 200px;
+        object-fit: cover;
+        border: 2px solid #2d4a2d;
+        cursor: pointer;
+        display: block;
+      }
+      .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.75);
+        z-index: 100;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .panel {
+        height: 100dvh;
+        display: flex;
+        flex-direction: column;
+      }
+      #sidebarLeft {
+        overflow-y: auto;
+        flex: 1;
+      }
+      .scanline-light {
+        background: repeating-linear-gradient(
+          0deg,
+          transparent,
+          transparent 2px,
+          rgba(0, 0, 0, 0.02) 2px,
+          rgba(0, 0, 0, 0.02) 4px
+        );
+        pointer-events: none;
+        position: absolute;
+        inset: 0;
+      }
+      @media (max-width: 768px) {
+        #leftPanel {
+          position: fixed;
+          left: -100%;
+          top: 0;
+          bottom: 0;
+          width: 80%;
+          z-index: 50;
+          transition: left 0.2s;
+        }
+        #leftPanel.open {
+          left: 0;
+        }
+        #rightPanel {
+          display: none;
+        }
+        #rightPanel.open {
+          display: flex;
+          position: fixed;
+          right: 0;
+          top: 0;
+          bottom: 0;
+          width: 80%;
+          z-index: 50;
+        }
+      }
+      .nametag-badge {
+        background: #2d4a2d;
+        color: #c8d8a8;
+        font-size: 10px;
+        padding: 1px 4px;
+        border: 1px solid #1a3a1a;
+      }
+      .unread-badge {
+        background: #cc4444;
+        color: white;
+        font-size: 10px;
+        min-width: 18px;
+        height: 18px;
+        border-radius: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid #8b0000;
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body class="bg-[#c8d8a8] flex" style="height: 100dvh; overflow: hidden">
+    <!-- LEFT PANEL -->
+    <div
+      id="leftPanel"
+      class="panel bg-[#d8e8c8] border-r-2 border-[#2d4a2d]"
+      style="width: 280px; min-width: 280px; flex-shrink: 0">
+      <div
+        class="bg-[#2d4a2d] px-3 py-2 flex items-center justify-between flex-shrink-0">
+        <div>
+          <h1 class="text-[#c8d8a8] font-bold text-sm tracking-widest">
+            ■ CHATKLASIK
+          </h1>
+          <p class="text-[#8fb88f] text-xs" id="headerStatus">Memuat...</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <button
+            id="createGroupBtn"
+            title="Buat Grup"
+            class="classic-btn bg-[#c8d8a8] text-[#2d4a2d] px-2 py-1 text-xs font-bold">
+            +GRP
+          </button>
+          <button id="profileMenuBtn" class="relative">
+            <img
+              id="myAvatarSmall"
+              src="https://ui-avatars.com/api/?name=User&background=d0ddb8&color=2d4a2d&size=32"
+              class="w-8 h-8 object-cover border-2 border-[#c8d8a8]"
+              alt="avatar" />
+            <span
+              id="myStatusDot"
+              class="absolute -bottom-1 -right-1 w-3 h-3 rounded-full status-online border border-[#2d4a2d]"></span>
+          </button>
+        </div>
       </div>
-      <div class="flex items-center gap-2">
-        <button id="createGroupBtn" title="Buat Grup" class="classic-btn bg-[#c8d8a8] text-[#2d4a2d] px-2 py-1 text-xs font-bold">+GRP</button>
-        <button id="profileMenuBtn" class="relative">
-          <img id="myAvatarSmall" src="/default-avatar.png" class="w-8 h-8 object-cover border-2 border-[#c8d8a8]" alt="avatar" />
-          <span id="myStatusDot" class="absolute -bottom-1 -right-1 w-3 h-3 rounded-full status-online border border-[#2d4a2d]"></span>
+      <div class="flex border-b-2 border-[#2d4a2d] flex-shrink-0">
+        <button
+          class="tab-btn active flex-1 py-2 text-xs font-bold tracking-wider"
+          data-tab="private"
+          id="tabPrivate">
+          💬 PERSONAL
+        </button>
+        <button
+          class="tab-btn flex-1 py-2 text-xs font-bold tracking-wider"
+          data-tab="group"
+          id="tabGroup">
+          👥 GRUP
+        </button>
+      </div>
+      <div
+        class="px-2 py-2 border-b border-[#2d4a2d] flex-shrink-0 bg-[#c8d8a8]">
+        <input
+          id="searchInput"
+          type="text"
+          placeholder="Cari pengguna/grup..."
+          class="classic-input w-full px-2 py-1 text-xs text-[#2d4a2d] placeholder-[#8fb88f]" />
+      </div>
+      <div id="sidebarLeft" class="flex-1 overflow-y-auto">
+        <div id="chatList" class="divide-y divide-[#2d4a2d]">
+          <div class="px-4 py-6 text-center text-[#4a6a4a] text-xs">
+            <p class="blink">[ MEMUAT... ]</p>
+          </div>
+        </div>
+      </div>
+      <div
+        class="border-t-2 border-[#2d4a2d] px-3 py-2 bg-[#c8d8a8] flex-shrink-0">
+        <button
+          id="logoutBtn"
+          class="classic-btn bg-[#8b0000] text-white w-full py-1 text-xs font-bold tracking-wider">
+          ▶ KELUAR ◀
         </button>
       </div>
     </div>
 
-    <!-- Tabs -->
-    <div class="flex border-b-2 border-[#2d4a2d] flex-shrink-0">
-      <button class="tab-btn active flex-1 py-2 text-xs font-bold tracking-wider" data-tab="private" id="tabPrivate">
-        💬 PERSONAL
-      </button>
-      <button class="tab-btn flex-1 py-2 text-xs font-bold tracking-wider" data-tab="group" id="tabGroup">
-        👥 GRUP
-      </button>
-    </div>
-
-    <!-- Search -->
-    <div class="px-2 py-2 border-b border-[#2d4a2d] flex-shrink-0 bg-[#c8d8a8]">
-      <input id="searchInput" type="text" placeholder="Cari pengguna/grup..."
-        class="classic-input w-full px-2 py-1 text-xs text-[#2d4a2d] placeholder-[#8fb88f]" />
-    </div>
-
-    <!-- Chat List -->
-    <div id="sidebarLeft" class="flex-1 overflow-y-auto">
-      <div id="chatList" class="divide-y divide-[#2d4a2d]">
-        <div class="px-4 py-6 text-center text-[#4a6a4a] text-xs">
-          <p class="blink">[ MEMUAT... ]</p>
-        </div>
-      </div>
-    </div>
-
-    <!-- Bottom Bar -->
-    <div class="border-t-2 border-[#2d4a2d] px-3 py-2 bg-[#c8d8a8] flex-shrink-0">
-      <button id="logoutBtn" class="classic-btn bg-[#8b0000] text-white w-full py-1 text-xs font-bold tracking-wider">
-        ▶ KELUAR ◀
-      </button>
-    </div>
-  </div>
-
-  <!-- ===== CENTER PANEL (Chat Area) ===== -->
-  <div class="flex-1 panel relative" id="centerPanel" style="min-width:0;">
-    <!-- No Chat Selected -->
-    <div id="noChatSelected" class="flex-1 flex flex-col items-center justify-center h-full bg-[#c8d8a8] relative">
-      <div class="scanline-light"></div>
-      <div class="text-center z-10 p-8">
-        <div class="text-6xl mb-4">💬</div>
-        <div class="classic-border bg-[#e8f0d8] p-6 inline-block">
-          <h2 class="text-[#2d4a2d] font-bold text-lg tracking-widest mb-2">■ CHATKLASIK ■</h2>
-          <p class="text-[#4a6a4a] text-xs mb-1">Pilih percakapan untuk mulai chatting</p>
-          <p class="text-[#4a6a4a] text-xs">atau buat grup baru dengan tombol +GRP</p>
-          <p class="text-[#8fb88f] text-xs mt-3 blink">[ MENUNGGU... ]</p>
-        </div>
-      </div>
-    </div>
-
-    <!-- Chat Active -->
-    <div id="chatArea" class="hidden h-full flex-col">
-      <!-- Chat Header -->
-      <div class="bg-[#2d4a2d] px-4 py-2 flex items-center gap-3 flex-shrink-0 border-b-2 border-[#1a3a1a]">
-        <button id="mobileBackBtn" class="text-[#c8d8a8] font-bold text-sm md:hidden">◀</button>
-        <div class="relative flex-shrink-0">
-          <img id="chatAvatar" src="/default-avatar.png" class="w-9 h-9 object-cover border-2 border-[#c8d8a8]" alt="avatar" />
-          <span id="chatStatusDot" class="absolute -bottom-1 -right-1 w-3 h-3 rounded-full status-offline border border-[#2d4a2d]"></span>
-        </div>
-        <div class="flex-1 min-w-0">
-          <h3 id="chatName" class="text-[#c8d8a8] font-bold text-sm truncate">—</h3>
-          <p id="chatSubtitle" class="text-[#8fb88f] text-xs truncate">—</p>
-        </div>
-        <div class="flex items-center gap-2">
-          <button id="chatInfoBtn" class="classic-btn bg-[#c8d8a8] text-[#2d4a2d] px-2 py-1 text-xs font-bold">INFO</button>
-        </div>
-      </div>
-
-      <!-- Messages -->
-      <div id="messagesContainer" class="flex-1 overflow-y-auto p-3 bg-[#c8d8a8] relative">
+    <!-- CENTER PANEL -->
+    <div class="flex-1 panel relative" id="centerPanel" style="min-width: 0">
+      <div
+        id="noChatSelected"
+        class="flex-1 flex flex-col items-center justify-center h-full bg-[#c8d8a8] relative">
         <div class="scanline-light"></div>
+        <div class="text-center z-10 p-8">
+          <div class="text-6xl mb-4">💬</div>
+          <div class="classic-border bg-[#e8f0d8] p-6 inline-block">
+            <h2 class="text-[#2d4a2d] font-bold text-lg tracking-widest mb-2">
+              ■ CHATKLASIK ■
+            </h2>
+            <p class="text-[#4a6a4a] text-xs mb-1">
+              Pilih percakapan untuk mulai chatting
+            </p>
+            <p class="text-[#4a6a4a] text-xs">
+              atau buat grup baru dengan tombol +GRP
+            </p>
+            <p class="text-[#8fb88f] text-xs mt-3 blink">[ MENUNGGU... ]</p>
+          </div>
+        </div>
       </div>
 
-      <!-- Mention Suggestions -->
-      <div id="mentionSuggestions" class="hidden border-t-2 border-[#2d4a2d] bg-[#e8f0d8] max-h-32 overflow-y-auto flex-shrink-0"></div>
-
-      <!-- Input Area -->
-      <div class="border-t-2 border-[#2d4a2d] bg-[#d8e8c8] p-2 flex-shrink-0">
-        <!-- Image Preview -->
-        <div id="imagePreviewArea" class="hidden mb-2 p-2 bg-[#e8f0d8] border-2 border-[#2d4a2d] flex items-center gap-2">
-          <img id="imagePreviewThumb" class="w-16 h-16 object-cover border border-[#2d4a2d]" />
-          <div class="flex-1">
-            <p class="text-xs text-[#2d4a2d] font-bold">GAMBAR SIAP DIKIRIM</p>
-            <p id="imagePreviewName" class="text-xs text-[#4a6a4a] truncate"></p>
-          </div>
-          <button id="cancelImageBtn" class="classic-btn bg-[#8b0000] text-white px-2 py-1 text-xs font-bold">✕</button>
-        </div>
-        <div class="flex items-end gap-2">
-          <button id="attachImageBtn" title="Kirim Gambar"
-            class="classic-btn bg-[#c8d8a8] text-[#2d4a2d] px-2 py-2 text-sm font-bold flex-shrink-0">📷</button>
-          <input type="file" id="imageInput" accept="image/*" class="hidden" />
-          <div class="flex-1 relative">
-            <textarea id="messageInput" placeholder="Ketik pesan... (@nama untuk mention)" rows="1"
-              class="classic-input w-full px-3 py-2 text-sm text-[#2d4a2d] placeholder-[#8fb88f] resize-none"
-              style="max-height:100px; overflow-y:auto;"></textarea>
-          </div>
-          <button id="sendBtn"
-            class="classic-btn bg-[#2d4a2d] text-[#c8d8a8] px-3 py-2 text-sm font-bold flex-shrink-0">
-            KIRIM ▶
+      <div id="chatArea" class="hidden h-full flex-col">
+        <div
+          class="bg-[#2d4a2d] px-4 py-2 flex items-center gap-3 flex-shrink-0 border-b-2 border-[#1a3a1a]">
+          <button
+            id="mobileBackBtn"
+            class="text-[#c8d8a8] font-bold text-sm md:hidden">
+            ◀
           </button>
-        </div>
-        <p class="text-[#4a6a4a] text-xs mt-1 text-right">Enter = kirim | Shift+Enter = baris baru</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- ===== RIGHT PANEL (Info) ===== -->
-  <div id="rightPanel" class="panel bg-[#d8e8c8] border-l-2 border-[#2d4a2d] hidden" style="width:240px; min-width:240px; flex-shrink:0;">
-    <div class="bg-[#2d4a2d] px-3 py-2 flex items-center justify-between flex-shrink-0">
-      <h3 class="text-[#c8d8a8] font-bold text-xs tracking-widest">■ INFO</h3>
-      <button id="closeRightPanel" class="text-[#8fb88f] hover:text-[#c8d8a8] text-xs font-bold">✕ TUTUP</button>
-    </div>
-    <div id="rightPanelContent" class="flex-1 overflow-y-auto p-3 text-xs text-[#2d4a2d]">
-      <p class="text-center text-[#4a6a4a] mt-8">[ Pilih percakapan ]</p>
-    </div>
-  </div>
-
-  <!-- ===== MODALS ===== -->
-
-  <!-- Profile Modal -->
-  <div id="profileModal" class="hidden modal-overlay p-4">
-    <div class="w-full max-w-sm">
-      <div class="bg-[#2d4a2d] py-2 px-4 classic-border" style="border-bottom: none;">
-        <h3 class="text-[#c8d8a8] font-bold tracking-widest text-sm">■ PROFIL SAYA ■</h3>
-      </div>
-      <div class="bg-[#e8f0d8] classic-border p-5 max-h-[80vh] overflow-y-auto">
-        <div class="flex flex-col items-center mb-4">
-          <div class="relative mb-2">
-            <img id="profileAvatarBig" src="/default-avatar.png" class="w-24 h-24 object-cover border-3 border-[#2d4a2d]" style="border-width:3px;" alt="avatar" />
-            <div class="absolute -bottom-2 -right-2 bg-[#2d4a2d] text-[#c8d8a8] text-xs px-1 cursor-pointer font-bold border border-[#1a3a1a]" id="changeProfileAvatarBtn">+</div>
-          </div>
-          <input type="file" id="profileAvatarInput" accept="image/*" class="hidden" />
-          <button id="uploadProfileAvatarBtn" class="classic-btn bg-[#c8d8a8] text-[#2d4a2d] px-3 py-1 text-xs font-bold mt-2">▶ GANTI FOTO</button>
-        </div>
-
-        <div id="profileAlertBox" class="hidden mb-3 p-2 border-2 border-[#8b0000] bg-[#ffe8e8] text-[#8b0000] text-xs"></div>
-        <div id="profileSuccessBox" class="hidden mb-3 p-2 border-2 border-[#2d4a2d] bg-[#e8f5e8] text-[#2d4a2d] text-xs"></div>
-
-        <div class="space-y-3">
-          <div>
-            <label class="block text-[#2d4a2d] text-xs font-bold mb-1 tracking-wider">NAMA LENGKAP:</label>
-            <input id="profileName" type="text" class="classic-input w-full px-2 py-1 text-sm text-[#2d4a2d]" maxlength="50" />
-          </div>
-          <div>
-            <label class="block text-[#2d4a2d] text-xs font-bold mb-1 tracking-wider">NAME TAG:</label>
-            <div class="flex items-center">
-              <span class="px-2 py-1 text-[#4a6a4a] text-sm border-2 border-r-0 border-[#2d4a2d] bg-[#d0ddb8]">@</span>
-              <input id="profileNameTag" type="text" class="classic-input flex-1 px-2 py-1 text-sm text-[#2d4a2d]" maxlength="20" style="border-left:none;" />
-            </div>
-          </div>
-          <div>
-            <label class="block text-[#2d4a2d] text-xs font-bold mb-1 tracking-wider">EMAIL:</label>
-            <p id="profileEmail" class="text-[#4a6a4a] text-sm bg-[#d0ddb8] px-2 py-1 border-2 border-[#2d4a2d]">—</p>
-          </div>
-          <div>
-            <label class="block text-[#2d4a2d] text-xs font-bold mb-1 tracking-wider">STATUS:</label>
-            <select id="profileStatus" class="classic-input w-full px-2 py-1 text-sm text-[#2d4a2d]">
-              <option value="online">🟢 Online</option>
-              <option value="away">🟡 Pergi</option>
-              <option value="busy">🔴 Sibuk</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="flex gap-2 mt-4">
-          <button id="saveProfileBtn" class="classic-btn bg-[#2d4a2d] text-[#c8d8a8] flex-1 py-2 text-xs font-bold tracking-wider">
-            ▶ SIMPAN
-          </button>
-          <button id="closeProfileBtn" class="classic-btn bg-[#c8d8a8] text-[#2d4a2d] flex-1 py-2 text-xs font-bold tracking-wider">
-            ✕ TUTUP
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Create Group Modal -->
-  <div id="createGroupModal" class="hidden modal-overlay p-4">
-    <div class="w-full max-w-sm">
-      <div class="bg-[#2d4a2d] py-2 px-4 classic-border" style="border-bottom: none;">
-        <h3 class="text-[#c8d8a8] font-bold tracking-widest text-sm">■ BUAT GRUP BARU ■</h3>
-      </div>
-      <div class="bg-[#e8f0d8] classic-border p-5">
-        <div id="groupAlertBox" class="hidden mb-3 p-2 border-2 border-[#8b0000] bg-[#ffe8e8] text-[#8b0000] text-xs"></div>
-        <div class="space-y-3">
-          <div>
-            <label class="block text-[#2d4a2d] text-xs font-bold mb-1 tracking-wider">NAMA GRUP:</label>
-            <input id="groupNameInput" type="text" placeholder="Nama Grup" maxlength="50"
-              class="classic-input w-full px-2 py-1 text-sm text-[#2d4a2d]" />
-          </div>
-          <div>
-            <label class="block text-[#2d4a2d] text-xs font-bold mb-1 tracking-wider">TAMBAH ANGGOTA:</label>
-            <input id="groupSearchInput" type="text" placeholder="Cari pengguna..."
-              class="classic-input w-full px-2 py-1 text-sm text-[#2d4a2d] mb-2" />
-            <div id="groupUserList" class="border-2 border-[#2d4a2d] max-h-36 overflow-y-auto bg-[#f0f5e8]">
-              <p class="text-center text-[#4a6a4a] text-xs py-3">Ketik nama untuk mencari...</p>
-            </div>
-          </div>
-          <div>
-            <label class="block text-[#2d4a2d] text-xs font-bold mb-1 tracking-wider">ANGGOTA DIPILIH:</label>
-            <div id="selectedMembers" class="flex flex-wrap gap-1 min-h-8 p-1 border-2 border-[#2d4a2d] bg-[#f0f5e8]">
-              <p class="text-[#8fb88f] text-xs">Belum ada anggota dipilih</p>
-            </div>
-          </div>
-        </div>
-        <div class="flex gap-2 mt-4">
-          <button id="createGroupConfirmBtn" class="classic-btn bg-[#2d4a2d] text-[#c8d8a8] flex-1 py-2 text-xs font-bold tracking-wider">
-            ▶ BUAT GRUP
-          </button>
-          <button id="closeGroupModalBtn" class="classic-btn bg-[#c8d8a8] text-[#2d4a2d] flex-1 py-2 text-xs font-bold tracking-wider">
-            ✕ BATAL
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Image Viewer Modal -->
-  <div id="imageViewModal" class="hidden modal-overlay" style="padding:0;">
-    <div class="relative w-full h-full flex items-center justify-center p-4">
-      <button id="closeImageView" class="absolute top-4 right-4 classic-btn bg-[#8b0000] text-white px-3 py-1 text-sm font-bold z-10">✕ TUTUP</button>
-      <img id="imageViewFull" src="" class="max-w-full max-h-full object-contain border-4 border-[#2d4a2d]" style="box-shadow: 8px 8px 0 #2d4a2d;" />
-    </div>
-  </div>
-
-  <!-- Mobile Sidebar Toggle -->
-  <button id="mobileMenuBtn" class="md:hidden fixed bottom-4 left-4 classic-btn bg-[#2d4a2d] text-[#c8d8a8] px-3 py-2 text-sm font-bold z-40">
-    ☰ MENU
-  </button>
-
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-app.js";
-    import {
-      getAuth, signOut, onAuthStateChanged, updateProfile
-    } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-auth.js";
-    import {
-      getDatabase, ref, set, get, push, onValue, off, update, serverTimestamp, onDisconnect, query, orderByChild, limitToLast, remove
-    } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-database.js";
-    import {
-      getStorage, ref as storageRef, uploadBytes, getDownloadURL, uploadString
-    } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-storage.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyBTVodDUMI6wTfQj0ZtezL9cmHFR7ESzNU",
-      authDomain: "web-chat-7af77.firebaseapp.com",
-      databaseURL: "https://web-chat-7af77-default-rtdb.firebaseio.com",
-      projectId: "web-chat-7af77",
-      storageBucket: "web-chat-7af77.firebasestorage.app",
-      messagingSenderId: "585530519219",
-      appId: "1:585530519219:web:f8595bdba2de25f1128ac6",
-      measurementId: "G-HG5N03TYNG"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getDatabase(app);
-    const storage = getStorage(app);
-
-    // =============================================
-    // STATE
-    // =============================================
-    let currentUser = null;
-    let currentUserData = null;
-    let currentChat = null; // { type: 'private'|'group', id: ..., name: ..., avatar: ... }
-    let allUsers = {};
-    let selectedGroupMembers = [];
-    let pendingImageFile = null;
-    let pendingImageBase64 = null;
-    let activeTab = 'private';
-    let messageListeners = {};
-    let chatListeners = {};
-    let unreadCounts = {};
-    let groupMembers = {}; // For current group chat
-    let mentionQuery = null;
-    let mentionStartPos = null;
-
-    // =============================================
-    // INIT & AUTH
-    // =============================================
-    onAuthStateChanged(auth, async (user) => {
-      if (!user) {
-        window.location.href = 'login.html';
-        return;
-      }
-      currentUser = user;
-      await loadCurrentUserData();
-      updateHeaderUI();
-      setOnlineStatus(true);
-      setupPresence();
-      loadChatList();
-    });
-
-    async function loadCurrentUserData() {
-      const snap = await get(ref(db, 'users/' + currentUser.uid));
-      if (snap.exists()) {
-        currentUserData = snap.val();
-      } else {
-        // Create default user data
-        currentUserData = {
-          uid: currentUser.uid,
-          name: currentUser.displayName || currentUser.email.split('@')[0],
-          nameTag: currentUser.email.split('@')[0].toLowerCase().replace(/[^a-z0-9_]/g, '_'),
-          email: currentUser.email,
-          photoURL: currentUser.photoURL || '',
-          status: 'online',
-          lastSeen: Date.now(),
-          createdAt: Date.now()
-        };
-        await set(ref(db, 'users/' + currentUser.uid), currentUserData);
-      }
-    }
-
-    function updateHeaderUI() {
-      document.getElementById('headerStatus').textContent = '@' + (currentUserData?.nameTag || '...');
-      const avatarEl = document.getElementById('myAvatarSmall');
-      if (currentUserData?.photoURL) avatarEl.src = currentUserData.photoURL;
-    }
-
-    // =============================================
-    // PRESENCE
-    // =============================================
-    function setOnlineStatus(isOnline) {
-      if (!currentUser) return;
-      const userRef = ref(db, 'users/' + currentUser.uid);
-      update(userRef, {
-        status: isOnline ? (currentUserData?.status || 'online') : 'offline',
-        lastSeen: Date.now()
-      });
-    }
-
-    function setupPresence() {
-      const connRef = ref(db, '.info/connected');
-      onValue(connRef, (snap) => {
-        if (snap.val() === true) {
-          const userRef = ref(db, 'users/' + currentUser.uid);
-          onDisconnect(userRef).update({ status: 'offline', lastSeen: serverTimestamp() });
-          update(userRef, { status: currentUserData?.status || 'online', lastSeen: Date.now() });
-        }
-      });
-    }
-
-    // =============================================
-    // LOAD ALL USERS
-    // =============================================
-    async function loadAllUsers() {
-      const snap = await get(ref(db, 'users'));
-      if (snap.exists()) {
-        allUsers = snap.val();
-      }
-    }
-
-    // Live update users
-    onValue(ref(db, 'users'), (snap) => {
-      if (snap.exists()) {
-        allUsers = snap.val();
-        // Update chat list statuses
-        updateChatListStatuses();
-        if (currentChat?.type === 'private') {
-          updateChatHeader();
-        }
-      }
-    });
-
-    // =============================================
-    // CHAT LIST
-    // =============================================
-    function loadChatList() {
-      // Load private conversations
-      if (chatListeners['private']) off(ref(db, 'conversations'));
-      chatListeners['private'] = onValue(ref(db, 'conversations'), (snap) => {
-        renderChatList();
-      });
-
-      // Load groups
-      if (chatListeners['groups']) off(ref(db, 'groups'));
-      chatListeners['groups'] = onValue(ref(db, 'groups'), (snap) => {
-        renderChatList();
-      });
-    }
-
-    async function renderChatList() {
-      const chatList = document.getElementById('chatList');
-      const searchVal = document.getElementById('searchInput').value.toLowerCase().trim();
-
-      if (activeTab === 'private') {
-        const snap = await get(ref(db, 'conversations'));
-        const items = [];
-
-        if (snap.exists()) {
-          const convs = snap.val();
-          for (const [convId, convData] of Object.entries(convs)) {
-            // Check if this conversation involves current user
-            if (!convId.includes(currentUser.uid)) continue;
-            const otherUid = convId.replace(currentUser.uid + '_', '').replace('_' + currentUser.uid, '');
-            const otherUser = allUsers[otherUid];
-            if (!otherUser) continue;
-
-            if (searchVal && !otherUser.name.toLowerCase().includes(searchVal) &&
-                !otherUser.nameTag?.toLowerCase().includes(searchVal)) continue;
-
-            const lastMsg = convData.lastMessage || {};
-            items.push({
-              id: convId,
-              otherUid,
-              name: otherUser.name,
-              nameTag: otherUser.nameTag || '',
-              avatar: otherUser.photoURL || '',
-              status: otherUser.status || 'offline',
-              lastMsg: lastMsg.text || (lastMsg.type === 'image' ? '📷 Gambar' : ''),
-              lastTime: lastMsg.timestamp || 0,
-              unread: unreadCounts[convId] || 0
-            });
-          }
-        }
-
-        // Also show all users if no search or has search match
-        if (!searchVal) {
-          // Show existing conversations sorted by time
-          items.sort((a, b) => b.lastTime - a.lastTime);
-        }
-
-        if (items.length === 0 && !searchVal) {
-          // Show all users to start chatting
-          const usersSnap = await get(ref(db, 'users'));
-          if (usersSnap.exists()) {
-            const users = usersSnap.val();
-            for (const [uid, u] of Object.entries(users)) {
-              if (uid === currentUser.uid) continue;
-              items.push({
-                id: getConvId(currentUser.uid, uid),
-                otherUid: uid,
-                name: u.name,
-                nameTag: u.nameTag || '',
-                avatar: u.photoURL || '',
-                status: u.status || 'offline',
-                lastMsg: 'Mulai percakapan...',
-                lastTime: 0,
-                unread: 0
-              });
-            }
-          }
-        }
-
-        if (searchVal) {
-          // Search among all users
-          const usersSnap = await get(ref(db, 'users'));
-          if (usersSnap.exists()) {
-            const users = usersSnap.val();
-            for (const [uid, u] of Object.entries(users)) {
-              if (uid === currentUser.uid) continue;
-              if (!u.name.toLowerCase().includes(searchVal) && !u.nameTag?.toLowerCase().includes(searchVal)) continue;
-              const convId = getConvId(currentUser.uid, uid);
-              if (items.find(i => i.id === convId)) continue;
-              items.push({
-                id: convId,
-                otherUid: uid,
-                name: u.name,
-                nameTag: u.nameTag || '',
-                avatar: u.photoURL || '',
-                status: u.status || 'offline',
-                lastMsg: 'Mulai percakapan...',
-                lastTime: 0,
-                unread: 0
-              });
-            }
-          }
-        }
-
-        renderPrivateList(chatList, items);
-
-      } else {
-        // Groups
-        const snap = await get(ref(db, 'groups'));
-        const items = [];
-
-        if (snap.exists()) {
-          const groups = snap.val();
-          for (const [gid, gdata] of Object.entries(groups)) {
-            if (!gdata.members || !gdata.members[currentUser.uid]) continue;
-            if (searchVal && !gdata.name.toLowerCase().includes(searchVal)) continue;
-            const lastMsg = gdata.lastMessage || {};
-            items.push({
-              id: gid,
-              name: gdata.name,
-              avatar: gdata.avatar || '',
-              memberCount: Object.keys(gdata.members || {}).length,
-              lastMsg: lastMsg.text || (lastMsg.type === 'image' ? '📷 Gambar' : ''),
-              lastTime: lastMsg.timestamp || 0,
-              createdBy: gdata.createdBy
-            });
-          }
-        }
-
-        items.sort((a, b) => b.lastTime - a.lastTime);
-        renderGroupList(chatList, items);
-      }
-    }
-
-    function renderPrivateList(container, items) {
-      if (items.length === 0) {
-        container.innerHTML = '<div class="px-4 py-6 text-center text-[#4a6a4a] text-xs"><p>[ TIDAK ADA PENGGUNA ]</p></div>';
-        return;
-      }
-      container.innerHTML = '';
-      items.forEach(item => {
-        const div = document.createElement('div');
-        div.className = 'chat-item px-3 py-3 flex items-center gap-2' + (currentChat?.id === item.id ? ' active' : '');
-        div.innerHTML = `
           <div class="relative flex-shrink-0">
-            <img src="${item.avatar || '/default-avatar.png'}" class="w-10 h-10 object-cover border-2 border-[#2d4a2d]" onerror="this.src='/default-avatar.png'" />
-            <span class="absolute -bottom-1 -right-1 w-3 h-3 rounded-full border border-[#2d4a2d] ${getStatusClass(item.status)}"></span>
+            <img
+              id="chatAvatar"
+              src="https://ui-avatars.com/api/?name=User&background=d0ddb8&color=2d4a2d&size=36"
+              class="w-9 h-9 object-cover border-2 border-[#c8d8a8]"
+              alt="avatar" />
+            <span
+              id="chatStatusDot"
+              class="absolute -bottom-1 -right-1 w-3 h-3 rounded-full status-offline border border-[#2d4a2d]"></span>
           </div>
           <div class="flex-1 min-w-0">
-            <div class="flex items-center justify-between">
-              <span class="text-[#2d4a2d] font-bold text-xs truncate">${escHtml(item.name)}</span>
-              ${item.unread > 0 ? `<span class="unread-badge">${item.unread}</span>` : ''}
-            </div>
-            <p class="text-[#4a6a4a] text-xs truncate">${item.nameTag ? '@' + item.nameTag + ' · ' : ''}${escHtml(item.lastMsg || '')}</p>
+            <h3 id="chatName" class="text-[#c8d8a8] font-bold text-sm truncate">
+              —
+            </h3>
+            <p id="chatSubtitle" class="text-[#8fb88f] text-xs truncate">—</p>
           </div>
-        `;
-        div.addEventListener('click', () => openPrivateChat(item.otherUid));
-        container.appendChild(div);
-      });
-    }
+          <button
+            id="chatInfoBtn"
+            class="classic-btn bg-[#c8d8a8] text-[#2d4a2d] px-2 py-1 text-xs font-bold">
+            INFO
+          </button>
+        </div>
 
-    function renderGroupList(container, items) {
-      if (items.length === 0) {
-        container.innerHTML = '<div class="px-4 py-6 text-center text-[#4a6a4a] text-xs"><p>[ BELUM ADA GRUP ]</p><p class="mt-1">Buat grup dengan tombol +GRP</p></div>';
-        return;
-      }
-      container.innerHTML = '';
-      items.forEach(item => {
-        const div = document.createElement('div');
-        div.className = 'chat-item px-3 py-3 flex items-center gap-2' + (currentChat?.id === item.id ? ' active' : '');
-        div.innerHTML = `
-          <div class="relative flex-shrink-0">
-            <div class="w-10 h-10 border-2 border-[#2d4a2d] bg-[#2d4a2d] flex items-center justify-center text-[#c8d8a8] font-bold text-sm">
-              ${item.name.charAt(0).toUpperCase()}
+        <div
+          id="messagesContainer"
+          class="flex-1 overflow-y-auto p-3 bg-[#c8d8a8] relative">
+          <div class="scanline-light"></div>
+        </div>
+
+        <div
+          id="mentionSuggestions"
+          class="hidden border-t-2 border-[#2d4a2d] bg-[#e8f0d8] max-h-32 overflow-y-auto flex-shrink-0"></div>
+
+        <div class="border-t-2 border-[#2d4a2d] bg-[#d8e8c8] p-2 flex-shrink-0">
+          <!-- Image Preview -->
+          <div
+            id="imagePreviewArea"
+            class="hidden mb-2 p-2 bg-[#e8f0d8] border-2 border-[#2d4a2d] flex items-center gap-2">
+            <img
+              id="imagePreviewThumb"
+              class="w-16 h-16 object-cover border border-[#2d4a2d]" />
+            <div class="flex-1">
+              <p class="text-xs text-[#2d4a2d] font-bold">
+                GAMBAR SIAP DIKIRIM
+              </p>
+              <p
+                id="imagePreviewName"
+                class="text-xs text-[#4a6a4a] truncate"></p>
             </div>
+            <button
+              id="cancelImageBtn"
+              class="classic-btn bg-[#8b0000] text-white px-2 py-1 text-xs font-bold">
+              ✕
+            </button>
           </div>
-          <div class="flex-1 min-w-0">
-            <div class="flex items-center justify-between">
-              <span class="text-[#2d4a2d] font-bold text-xs truncate">👥 ${escHtml(item.name)}</span>
-              <span class="text-[#8fb88f] text-xs">${item.memberCount} anggota</span>
+          <div class="flex items-end gap-2">
+            <button
+              id="attachImageBtn"
+              title="Kirim Gambar"
+              class="classic-btn bg-[#c8d8a8] text-[#2d4a2d] px-2 py-2 text-sm font-bold flex-shrink-0">
+              📷
+            </button>
+            <input
+              type="file"
+              id="imageInput"
+              accept="image/*"
+              class="hidden" />
+            <div class="flex-1 relative">
+              <textarea
+                id="messageInput"
+                placeholder="Ketik pesan... (@nama untuk mention)"
+                rows="1"
+                class="classic-input w-full px-3 py-2 text-sm text-[#2d4a2d] placeholder-[#8fb88f] resize-none"
+                style="max-height: 100px; overflow-y: auto"></textarea>
             </div>
-            <p class="text-[#4a6a4a] text-xs truncate">${escHtml(item.lastMsg || 'Belum ada pesan')}</p>
+            <button
+              id="sendBtn"
+              class="classic-btn bg-[#2d4a2d] text-[#c8d8a8] px-3 py-2 text-sm font-bold flex-shrink-0">
+              KIRIM ▶
+            </button>
           </div>
-        `;
-        div.addEventListener('click', () => openGroupChat(item.id));
-        container.appendChild(div);
-      });
-    }
+          <p class="text-[#4a6a4a] text-xs mt-1 text-right">
+            Enter = kirim | Shift+Enter = baris baru
+          </p>
+        </div>
+      </div>
+    </div>
 
-    function updateChatListStatuses() {
-      // Update status dots in list
-      const items = document.querySelectorAll('.chat-item');
-      items.forEach(item => {
-        // Re-render will handle this
-      });
-    }
+    <!-- RIGHT PANEL -->
+    <div
+      id="rightPanel"
+      class="panel bg-[#d8e8c8] border-l-2 border-[#2d4a2d] hidden"
+      style="width: 240px; min-width: 240px; flex-shrink: 0">
+      <div
+        class="bg-[#2d4a2d] px-3 py-2 flex items-center justify-between flex-shrink-0">
+        <h3 class="text-[#c8d8a8] font-bold text-xs tracking-widest">■ INFO</h3>
+        <button
+          id="closeRightPanel"
+          class="text-[#8fb88f] hover:text-[#c8d8a8] text-xs font-bold">
+          ✕ TUTUP
+        </button>
+      </div>
+      <div
+        id="rightPanelContent"
+        class="flex-1 overflow-y-auto p-3 text-xs text-[#2d4a2d]">
+        <p class="text-center text-[#4a6a4a] mt-8">[ Pilih percakapan ]</p>
+      </div>
+    </div>
 
-    function getStatusClass(status) {
-      if (status === 'online') return 'status-online';
-      if (status === 'away') return 'bg-yellow-500';
-      if (status === 'busy') return 'bg-red-600';
-      return 'status-offline';
-    }
-
-    function getStatusLabel(status) {
-      if (status === 'online') return '🟢 Online';
-      if (status === 'away') return '🟡 Pergi';
-      if (status === 'busy') return '🔴 Sibuk';
-      return '⚫ Offline';
-    }
-
-    // =============================================
-    // OPEN PRIVATE CHAT
-    // =============================================
-    async function openPrivateChat(otherUid) {
-      const convId = getConvId(currentUser.uid, otherUid);
-      const otherUser = allUsers[otherUid] || {};
-      currentChat = {
-        type: 'private',
-        id: convId,
-        otherUid: otherUid,
-        name: otherUser.name || 'Unknown',
-        avatar: otherUser.photoURL || '',
-        nameTag: otherUser.nameTag || ''
-      };
-      groupMembers = {};
-
-      // Initialize conversation node if not exists
-      const convSnap = await get(ref(db, 'conversations/' + convId));
-      if (!convSnap.exists()) {
-        await set(ref(db, 'conversations/' + convId), {
-          participants: { [currentUser.uid]: true, [otherUid]: true },
-          lastMessage: { text: '', timestamp: Date.now() },
-          createdAt: Date.now()
-        });
-      }
-
-      showChatArea();
-      updateChatHeader();
-      loadMessages(convId, 'private');
-      renderChatList();
-      closeMobileSidebar();
-    }
-
-    // =============================================
-    // OPEN GROUP CHAT
-    // =============================================
-    async function openGroupChat(groupId) {
-      const snap = await get(ref(db, 'groups/' + groupId));
-      if (!snap.exists()) return;
-      const gdata = snap.val();
-      currentChat = {
-        type: 'group',
-        id: groupId,
-        name: gdata.name,
-        avatar: gdata.avatar || '',
-        createdBy: gdata.createdBy
-      };
-      groupMembers = gdata.members || {};
-      showChatArea();
-      updateChatHeader();
-      loadMessages(groupId, 'group');
-      renderChatList();
-      closeMobileSidebar();
-      loadRightPanelGroupInfo(groupId, gdata);
-    }
-
-    function showChatArea() {
-      document.getElementById('noChatSelected').classList.add('hidden');
-      document.getElementById('chatArea').classList.remove('hidden');
-      document.getElementById('chatArea').style.display = 'flex';
-    }
-
-    function updateChatHeader() {
-      if (!currentChat) return;
-      document.getElementById('chatName').textContent = currentChat.name;
-      const avatarEl = document.getElementById('chatAvatar');
-      const statusDot = document.getElementById('chatStatusDot');
-
-      if (currentChat.type === 'private') {
-        const otherUser = allUsers[currentChat.otherUid] || {};
-        avatarEl.src = otherUser.photoURL || '/default-avatar.png';
-        avatarEl.onerror = () => { avatarEl.src = '/default-avatar.png'; };
-        const status = otherUser.status || 'offline';
-        statusDot.className = `absolute -bottom-1 -right-1 w-3 h-3 rounded-full border border-[#2d4a2d] ${getStatusClass(status)}`;
-        document.getElementById('chatSubtitle').textContent = getStatusLabel(status) + (currentChat.nameTag ? ' · @' + currentChat.nameTag : '');
-      } else {
-        avatarEl.src = '/default-avatar.png';
-        statusDot.className = 'absolute -bottom-1 -right-1 w-3 h-3 rounded-full border border-[#2d4a2d] status-online';
-        const count = Object.keys(groupMembers).length;
-        document.getElementById('chatSubtitle').textContent = `👥 ${count} anggota`;
-      }
-    }
-
-    // =============================================
-    // MESSAGES
-    // =============================================
-    function loadMessages(chatId, type) {
-      // Clear previous listener
-      Object.keys(messageListeners).forEach(key => {
-        off(messageListeners[key].ref);
-      });
-      messageListeners = {};
-
-      const msgPath = type === 'group' ? `groupMessages/${chatId}` : `messages/${chatId}`;
-      const msgRef = query(ref(db, msgPath), orderByChild('timestamp'), limitToLast(100));
-      const container = document.getElementById('messagesContainer');
-      container.innerHTML = '<div class="text-center text-[#4a6a4a] text-xs py-4 blink">[ MEMUAT PESAN... ]</div>';
-
-      const listener = onValue(msgRef, (snap) => {
-        const msgs = [];
-        if (snap.exists()) {
-          snap.forEach(child => {
-            msgs.push({ id: child.key, ...child.val() });
-          });
-        }
-        renderMessages(msgs, container);
-      });
-
-      messageListeners['current'] = { ref: msgRef };
-    }
-
-    function renderMessages(msgs, container) {
-      if (msgs.length === 0) {
-        container.innerHTML = '<div class="text-center text-[#4a6a4a] text-xs py-8"><div class="classic-border inline-block px-4 py-2 bg-[#e8f0d8]">[ BELUM ADA PESAN ]<br><span class="text-[#8fb88f]">Mulai percakapan sekarang!</span></div></div>';
-        return;
-      }
-
-      container.innerHTML = '';
-      let lastDate = '';
-
-      msgs.forEach((msg, idx) => {
-        const isMe = msg.senderId === currentUser.uid;
-        const date = msg.timestamp ? new Date(msg.timestamp) : new Date();
-        const dateStr = date.toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric', month: 'short' });
-        const timeStr = date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
-
-        // Date separator
-        if (dateStr !== lastDate) {
-          lastDate = dateStr;
-          const sep = document.createElement('div');
-          sep.className = 'flex items-center justify-center my-3';
-          sep.innerHTML = `<span class="text-[#4a6a4a] text-xs border-2 border-dashed border-[#4a6a4a] px-3 py-1 bg-[#d0ddb8]">— ${dateStr} —</span>`;
-          container.appendChild(sep);
-        }
-
-        if (msg.type === 'system') {
-          const div = document.createElement('div');
-          div.className = 'flex justify-center my-1';
-          div.innerHTML = `<span class="msg-bubble-system text-xs px-3 py-1 max-w-xs text-center">${escHtml(msg.text)}</span>`;
-          container.appendChild(div);
-          return;
-        }
-
-        const senderData = allUsers[msg.senderId] || { name: 'Unknown', nameTag: '' };
-        const div = document.createElement('div');
-        div.className = `flex ${isMe ? 'justify-end' : 'justify-start'} mb-2 items-end gap-2`;
-
-        let contentHtml = '';
-        if (msg.type === 'image') {
-          contentHtml = `
-            <img src="${escHtml(msg.imageUrl)}" class="img-msg" alt="gambar"
-              onclick="window.openImageView('${escHtml(msg.imageUrl)}')"
-              onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" />
-            <p class="hidden text-xs text-red-500">[Gambar tidak tersedia]</p>
-            ${msg.text ? `<p class="text-xs mt-1">${parseMentions(escHtml(msg.text))}</p>` : ''}
-          `;
-        } else {
-          contentHtml = `<p class="text-sm leading-relaxed break-words">${parseMentions(escHtml(msg.text || ''))}</p>`;
-        }
-
-        let senderInfo = '';
-        if (!isMe && currentChat?.type === 'group') {
-          senderInfo = `<p class="text-xs font-bold mb-1 ${isMe ? 'text-[#8fb88f]' : 'text-[#2d4a2d]'}">${escHtml(senderData.name)}<span class="nametag-badge ml-1">@${escHtml(senderData.nameTag || '')}</span></p>`;
-        }
-
-        if (isMe) {
-          div.innerHTML = `
-            <div class="max-w-xs lg:max-w-md">
-              ${senderInfo}
-              <div class="msg-bubble-me px-3 py-2">
-                ${contentHtml}
+    <!-- Profile Modal -->
+    <div id="profileModal" class="hidden modal-overlay p-4">
+      <div class="w-full max-w-sm">
+        <div
+          class="bg-[#2d4a2d] py-2 px-4 classic-border"
+          style="border-bottom: none">
+          <h3 class="text-[#c8d8a8] font-bold tracking-widest text-sm">
+            ■ PROFIL SAYA ■
+          </h3>
+        </div>
+        <div
+          class="bg-[#e8f0d8] classic-border p-5 max-h-[80vh] overflow-y-auto">
+          <div class="flex flex-col items-center mb-4">
+            <div class="relative mb-2">
+              <img
+                id="profileAvatarBig"
+                src="https://ui-avatars.com/api/?name=User&background=d0ddb8&color=2d4a2d&size=96"
+                class="w-24 h-24 object-cover border-3 border-[#2d4a2d]"
+                style="border-width: 3px"
+                alt="avatar" />
+              <div
+                class="absolute -bottom-2 -right-2 bg-[#2d4a2d] text-[#c8d8a8] text-xs px-1 cursor-pointer font-bold border border-[#1a3a1a]"
+                id="changeProfileAvatarBtn">
+                +
               </div>
-              <p class="text-right text-xs text-[#4a6a4a] mt-1">${timeStr} ✓</p>
             </div>
-          `;
-        } else {
-          div.innerHTML = `
-            <img src="${senderData.photoURL || '/default-avatar.png'}" class="w-7 h-7 object-cover border border-[#2d4a2d] flex-shrink-0 mb-5" onerror="this.src='/default-avatar.png'" />
-            <div class="max-w-xs lg:max-w-md">
-              ${senderInfo}
-              <div class="msg-bubble-other px-3 py-2">
-                ${contentHtml}
+            <input
+              type="file"
+              id="profileAvatarInput"
+              accept="image/*"
+              class="hidden" />
+            <button
+              id="uploadProfileAvatarBtn"
+              class="classic-btn bg-[#c8d8a8] text-[#2d4a2d] px-3 py-1 text-xs font-bold mt-2">
+              ▶ GANTI FOTO
+            </button>
+            <p class="text-[#8fb88f] text-xs mt-1">Max 500KB | JPG, PNG</p>
+          </div>
+          <div
+            id="profileAlertBox"
+            class="hidden mb-3 p-2 border-2 border-[#8b0000] bg-[#ffe8e8] text-[#8b0000] text-xs"></div>
+          <div
+            id="profileSuccessBox"
+            class="hidden mb-3 p-2 border-2 border-[#2d4a2d] bg-[#e8f5e8] text-[#2d4a2d] text-xs"></div>
+          <div class="space-y-3">
+            <div>
+              <label
+                class="block text-[#2d4a2d] text-xs font-bold mb-1 tracking-wider"
+                >NAMA LENGKAP:</label
+              >
+              <input
+                id="profileName"
+                type="text"
+                class="classic-input w-full px-2 py-1 text-sm text-[#2d4a2d]"
+                maxlength="50" />
+            </div>
+            <div>
+              <label
+                class="block text-[#2d4a2d] text-xs font-bold mb-1 tracking-wider"
+                >NAME TAG:</label
+              >
+              <div class="flex items-center">
+                <span
+                  class="px-2 py-1 text-[#4a6a4a] text-sm border-2 border-r-0 border-[#2d4a2d] bg-[#d0ddb8]"
+                  >@</span
+                >
+                <input
+                  id="profileNameTag"
+                  type="text"
+                  class="classic-input flex-1 px-2 py-1 text-sm text-[#2d4a2d]"
+                  maxlength="20"
+                  style="border-left: none" />
               </div>
-              <p class="text-xs text-[#4a6a4a] mt-1">${timeStr}</p>
             </div>
-          `;
-        }
-        container.appendChild(div);
-      });
+            <div>
+              <label
+                class="block text-[#2d4a2d] text-xs font-bold mb-1 tracking-wider"
+                >EMAIL:</label
+              >
+              <p
+                id="profileEmail"
+                class="text-[#4a6a4a] text-sm bg-[#d0ddb8] px-2 py-1 border-2 border-[#2d4a2d]">
+                —
+              </p>
+            </div>
+            <div>
+              <label
+                class="block text-[#2d4a2d] text-xs font-bold mb-1 tracking-wider"
+                >STATUS:</label
+              >
+              <select
+                id="profileStatus"
+                class="classic-input w-full px-2 py-1 text-sm text-[#2d4a2d]">
+                <option value="online">🟢 Online</option>
+                <option value="away">🟡 Pergi</option>
+                <option value="busy">🔴 Sibuk</option>
+              </select>
+            </div>
+          </div>
+          <div class="flex gap-2 mt-4">
+            <button
+              id="saveProfileBtn"
+              class="classic-btn bg-[#2d4a2d] text-[#c8d8a8] flex-1 py-2 text-xs font-bold tracking-wider">
+              ▶ SIMPAN
+            </button>
+            <button
+              id="closeProfileBtn"
+              class="classic-btn bg-[#c8d8a8] text-[#2d4a2d] flex-1 py-2 text-xs font-bold tracking-wider">
+              ✕ TUTUP
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
 
-      // Scroll to bottom
-      container.scrollTop = container.scrollHeight;
-    }
+    <!-- Create Group Modal -->
+    <div id="createGroupModal" class="hidden modal-overlay p-4">
+      <div class="w-full max-w-sm">
+        <div
+          class="bg-[#2d4a2d] py-2 px-4 classic-border"
+          style="border-bottom: none">
+          <h3 class="text-[#c8d8a8] font-bold tracking-widest text-sm">
+            ■ BUAT GRUP BARU ■
+          </h3>
+        </div>
+        <div class="bg-[#e8f0d8] classic-border p-5">
+          <div
+            id="groupAlertBox"
+            class="hidden mb-3 p-2 border-2 border-[#8b0000] bg-[#ffe8e8] text-[#8b0000] text-xs"></div>
+          <div class="space-y-3">
+            <div>
+              <label
+                class="block text-[#2d4a2d] text-xs font-bold mb-1 tracking-wider"
+                >NAMA GRUP:</label
+              >
+              <input
+                id="groupNameInput"
+                type="text"
+                placeholder="Nama Grup"
+                maxlength="50"
+                class="classic-input w-full px-2 py-1 text-sm text-[#2d4a2d]" />
+            </div>
+            <div>
+              <label
+                class="block text-[#2d4a2d] text-xs font-bold mb-1 tracking-wider"
+                >TAMBAH ANGGOTA:</label
+              >
+              <input
+                id="groupSearchInput"
+                type="text"
+                placeholder="Cari pengguna..."
+                class="classic-input w-full px-2 py-1 text-sm text-[#2d4a2d] mb-2" />
+              <div
+                id="groupUserList"
+                class="border-2 border-[#2d4a2d] max-h-36 overflow-y-auto bg-[#f0f5e8]">
+                <p class="text-center text-[#4a6a4a] text-xs py-3">
+                  Ketik nama untuk mencari...
+                </p>
+              </div>
+            </div>
+            <div>
+              <label
+                class="block text-[#2d4a2d] text-xs font-bold mb-1 tracking-wider"
+                >ANGGOTA DIPILIH:</label
+              >
+              <div
+                id="selectedMembers"
+                class="flex flex-wrap gap-1 min-h-8 p-1 border-2 border-[#2d4a2d] bg-[#f0f5e8]">
+                <p class="text-[#8fb88f] text-xs">Belum ada anggota dipilih</p>
+              </div>
+            </div>
+          </div>
+          <div class="flex gap-2 mt-4">
+            <button
+              id="createGroupConfirmBtn"
+              class="classic-btn bg-[#2d4a2d] text-[#c8d8a8] flex-1 py-2 text-xs font-bold tracking-wider">
+              ▶ BUAT GRUP
+            </button>
+            <button
+              id="closeGroupModalBtn"
+              class="classic-btn bg-[#c8d8a8] text-[#2d4a2d] flex-1 py-2 text-xs font-bold tracking-wider">
+              ✕ BATAL
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
 
-    function parseMentions(text) {
-      return text.replace(/@([a-z0-9_]+)/gi, (match, tag) => {
-        return `<span class="mention-highlight">${match}</span>`;
-      });
-    }
+    <!-- Image Viewer Modal -->
+    <div id="imageViewModal" class="hidden modal-overlay" style="padding: 0">
+      <div class="relative w-full h-full flex items-center justify-center p-4">
+        <button
+          id="closeImageView"
+          class="absolute top-4 right-4 classic-btn bg-[#8b0000] text-white px-3 py-1 text-sm font-bold z-10">
+          ✕ TUTUP
+        </button>
+        <img
+          id="imageViewFull"
+          src=""
+          class="max-w-full max-h-full object-contain border-4 border-[#2d4a2d]"
+          style="box-shadow: 8px 8px 0 #2d4a2d" />
+      </div>
+    </div>
 
-    // =============================================
-    // SEND MESSAGE
-    // =============================================
-    async function sendMessage() {
-      if (!currentChat) return;
-      const input = document.getElementById('messageInput');
-      const text = input.value.trim();
+    <!-- Mobile Sidebar Toggle -->
+    <button
+      id="mobileMenuBtn"
+      class="md:hidden fixed bottom-4 left-4 classic-btn bg-[#2d4a2d] text-[#c8d8a8] px-3 py-2 text-sm font-bold z-40">
+      ☰ MENU
+    </button>
 
-      if (!text && !pendingImageFile && !pendingImageBase64) return;
+    <script type="module">
+      import {initializeApp} from "https://www.gstatic.com/firebasejs/10.7.2/firebase-app.js";
+      import {
+        getAuth,
+        signOut,
+        onAuthStateChanged,
+        updateProfile,
+      } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-auth.js";
+      import {
+        getDatabase,
+        ref,
+        set,
+        get,
+        push,
+        onValue,
+        off,
+        update,
+        serverTimestamp,
+        onDisconnect,
+        query,
+        orderByChild,
+        limitToLast,
+        remove,
+      } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-database.js";
 
-      const msgData = {
-        senderId: currentUser.uid,
-        senderName: currentUserData?.name || currentUser.displayName || 'Unknown',
-        timestamp: Date.now(),
-        type: 'text'
+      const firebaseConfig = {
+        apiKey: "AIzaSyBTVodDUMI6wTfQj0ZtezL9cmHFR7ESzNU",
+        authDomain: "web-chat-7af77.firebaseapp.com",
+        databaseURL:
+          "https://web-chat-7af77-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "web-chat-7af77",
+        storageBucket: "web-chat-7af77.firebasestorage.app",
+        messagingSenderId: "585530519219",
+        appId: "1:585530519219:web:f8595bdba2de25f1128ac6",
+        measurementId: "G-HG5N03TYNG",
       };
 
-      const msgPath = currentChat.type === 'group' ? `groupMessages/${currentChat.id}` : `messages/${currentChat.id}`;
-      const convBasePath = currentChat.type === 'group' ? `groups/${currentChat.id}` : `conversations/${currentChat.id}`;
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
+      const db = getDatabase(app);
 
-      try {
-        if (pendingImageFile || pendingImageBase64) {
-          // Send image
-          let imageUrl = '';
-          if (pendingImageFile) {
-            try {
-              const imgRef = storageRef(storage, `chatImages/${currentUser.uid}/${Date.now()}_${pendingImageFile.name}`);
-              await uploadBytes(imgRef, pendingImageFile);
-              imageUrl = await getDownloadURL(imgRef);
-            } catch (e) {
-              // Fallback to base64
-              imageUrl = pendingImageBase64;
-            }
-          } else {
-            imageUrl = pendingImageBase64;
-          }
-
-          const imgMsg = { ...msgData, type: 'image', imageUrl, text: text || '' };
-          await push(ref(db, msgPath), imgMsg);
-          await update(ref(db, convBasePath), {
-            lastMessage: { type: 'image', text: '📷 Gambar', timestamp: Date.now() }
-          });
-
-          clearImagePreview();
-        } else {
-          // Send text
-          const textMsg = { ...msgData, text };
-          await push(ref(db, msgPath), textMsg);
-          await update(ref(db, convBasePath), {
-            lastMessage: { type: 'text', text, timestamp: Date.now() }
-          });
-        }
-
-        input.value = '';
-        input.style.height = 'auto';
-        hideMentionSuggestions();
-      } catch (err) {
-        console.error('Send error:', err);
-        alert('Gagal mengirim pesan: ' + err.message);
-      }
-    }
-
-    // =============================================
-    // IMAGE HANDLING
-    // =============================================
-    document.getElementById('attachImageBtn').addEventListener('click', () => {
-      document.getElementById('imageInput').click();
-    });
-
-    document.getElementById('imageInput').addEventListener('change', (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-      if (file.size > 5 * 1024 * 1024) {
-        alert('Ukuran gambar maksimal 5MB.');
-        return;
-      }
-      pendingImageFile = file;
-      const reader = new FileReader();
-      reader.onload = (ev) => {
-        pendingImageBase64 = ev.target.result;
-        document.getElementById('imagePreviewThumb').src = ev.target.result;
-        document.getElementById('imagePreviewName').textContent = file.name;
-        document.getElementById('imagePreviewArea').classList.remove('hidden');
-      };
-      reader.readAsDataURL(file);
-    });
-
-    document.getElementById('cancelImageBtn').addEventListener('click', clearImagePreview);
-
-    function clearImagePreview() {
-      pendingImageFile = null;
-      pendingImageBase64 = null;
-      document.getElementById('imageInput').value = '';
-      document.getElementById('imagePreviewArea').classList.add('hidden');
-    }
-
-    // Image Viewer
-    window.openImageView = (url) => {
-      document.getElementById('imageViewFull').src = url;
-      document.getElementById('imageViewModal').classList.remove('hidden');
-    };
-    document.getElementById('closeImageView').addEventListener('click', () => {
-      document.getElementById('imageViewModal').classList.add('hidden');
-    });
-    document.getElementById('imageViewModal').addEventListener('click', (e) => {
-      if (e.target === document.getElementById('imageViewModal')) {
-        document.getElementById('imageViewModal').classList.add('hidden');
-      }
-    });
-
-    // =============================================
-    // MESSAGE INPUT
-    // =============================================
-    const messageInput = document.getElementById('messageInput');
-
-    messageInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        sendMessage();
-        return;
-      }
-    });
-
-    messageInput.addEventListener('input', () => {
-      // Auto-resize
-      messageInput.style.height = 'auto';
-      messageInput.style.height = Math.min(messageInput.scrollHeight, 100) + 'px';
-
-      // Mention detection
-      const val = messageInput.value;
-      const cursor = messageInput.selectionStart;
-      const textBefore = val.substring(0, cursor);
-      const atIndex = textBefore.lastIndexOf('@');
-
-      if (atIndex !== -1 && currentChat?.type === 'group') {
-        const query = textBefore.substring(atIndex + 1);
-        if (!/\s/.test(query)) {
-          mentionQuery = query;
-          mentionStartPos = atIndex;
-          showMentionSuggestions(query);
-          return;
-        }
-      }
-      hideMentionSuggestions();
-    });
-
-    document.getElementById('sendBtn').addEventListener('click', sendMessage);
-
-    // =============================================
-    // MENTION SUGGESTIONS
-    // =============================================
-    function showMentionSuggestions(query) {
-      if (!currentChat || currentChat.type !== 'group') return;
-
-      const suggestions = Object.entries(groupMembers)
-        .filter(([uid]) => uid !== currentUser.uid && allUsers[uid])
-        .map(([uid]) => allUsers[uid])
-        .filter(u => u && (
-          u.nameTag?.toLowerCase().includes(query.toLowerCase()) ||
-          u.name?.toLowerCase().includes(query.toLowerCase())
-        ))
-        .slice(0, 5);
-
-      const container = document.getElementById('mentionSuggestions');
-      if (suggestions.length === 0) {
-        hideMentionSuggestions();
-        return;
-      }
-
-      container.innerHTML = '';
-      suggestions.forEach(u => {
-        const div = document.createElement('div');
-        div.className = 'mention-suggestion flex items-center gap-2 px-3 py-2';
-        div.innerHTML = `
-          <img src="${u.photoURL || '/default-avatar.png'}" class="w-6 h-6 object-cover border border-[#2d4a2d]" onerror="this.src='/default-avatar.png'" />
-          <span class="text-[#2d4a2d] text-xs font-bold">${escHtml(u.name)}</span>
-          <span class="text-[#4a6a4a] text-xs">@${escHtml(u.nameTag || '')}</span>
-        `;
-        div.addEventListener('mousedown', (e) => {
-          e.preventDefault();
-          insertMention(u.nameTag || u.name);
-        });
-        container.appendChild(div);
-      });
-
-      container.classList.remove('hidden');
-    }
-
-    function hideMentionSuggestions() {
-      document.getElementById('mentionSuggestions').classList.add('hidden');
-      mentionQuery = null;
-      mentionStartPos = null;
-    }
-
-    function insertMention(nameTag) {
-      const val = messageInput.value;
-      const before = val.substring(0, mentionStartPos);
-      const after = val.substring(messageInput.selectionStart);
-      messageInput.value = before + '@' + nameTag + ' ' + after;
-      messageInput.focus();
-      const newPos = mentionStartPos + nameTag.length + 2;
-      messageInput.setSelectionRange(newPos, newPos);
-      hideMentionSuggestions();
-    }
-
-    // =============================================
-    // PROFILE MODAL
-    // =============================================
-    document.getElementById('profileMenuBtn').addEventListener('click', () => {
-      openProfileModal();
-    });
-
-    function openProfileModal() {
-      const modal = document.getElementById('profileModal');
-      modal.classList.remove('hidden');
-      document.getElementById('profileName').value = currentUserData?.name || '';
-      document.getElementById('profileNameTag').value = currentUserData?.nameTag || '';
-      document.getElementById('profileEmail').textContent = currentUser?.email || '';
-      document.getElementById('profileStatus').value = currentUserData?.status || 'online';
-      if (currentUserData?.photoURL) {
-        document.getElementById('profileAvatarBig').src = currentUserData.photoURL;
-      }
-      document.getElementById('profileAlertBox').classList.add('hidden');
-      document.getElementById('profileSuccessBox').classList.add('hidden');
-    }
-
-    document.getElementById('closeProfileBtn').addEventListener('click', () => {
-      document.getElementById('profileModal').classList.add('hidden');
-    });
-
-    // Profile Avatar
-    let profileAvatarFile = null;
-    let profileAvatarBase64 = null;
-
-    document.getElementById('uploadProfileAvatarBtn').addEventListener('click', () => {
-      document.getElementById('profileAvatarInput').click();
-    });
-    document.getElementById('changeProfileAvatarBtn').addEventListener('click', () => {
-      document.getElementById('profileAvatarInput').click();
-    });
-
-    document.getElementById('profileAvatarInput').addEventListener('change', (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-      if (file.size > 2 * 1024 * 1024) {
-        alert('Ukuran foto maksimal 2MB.');
-        return;
-      }
-      profileAvatarFile = file;
-      const reader = new FileReader();
-      reader.onload = (ev) => {
-        profileAvatarBase64 = ev.target.result;
-        document.getElementById('profileAvatarBig').src = ev.target.result;
-      };
-      reader.readAsDataURL(file);
-    });
-
-    document.getElementById('saveProfileBtn').addEventListener('click', async () => {
-      const name = document.getElementById('profileName').value.trim();
-      const nameTag = document.getElementById('profileNameTag').value.trim().toLowerCase();
-      const status = document.getElementById('profileStatus').value;
-
-      const alertEl = document.getElementById('profileAlertBox');
-      const successEl = document.getElementById('profileSuccessBox');
-
-      if (!name || !nameTag) {
-        alertEl.textContent = '⚠ Nama dan name tag wajib diisi.';
-        alertEl.classList.remove('hidden');
-        return;
-      }
-      if (!/^[a-z0-9_]+$/.test(nameTag)) {
-        alertEl.textContent = '⚠ Name tag hanya boleh huruf kecil, angka, garis bawah.';
-        alertEl.classList.remove('hidden');
-        return;
-      }
-
-      const btn = document.getElementById('saveProfileBtn');
-      btn.textContent = '⌛ MENYIMPAN...';
-      btn.disabled = true;
-
-      try {
-        // Check if name tag changed and is available
-        if (nameTag !== currentUserData?.nameTag) {
-          const tagSnap = await get(ref(db, 'nameTags/' + nameTag));
-          if (tagSnap.exists() && tagSnap.val() !== currentUser.uid) {
-            alertEl.textContent = '⚠ Name tag @' + nameTag + ' sudah digunakan.';
-            alertEl.classList.remove('hidden');
-            btn.textContent = '▶ SIMPAN';
-            btn.disabled = false;
+      // ============================================
+      // UTILITY: Resize image file to base64
+      // ============================================
+      function resizeImageToBase64(file, maxSize = 400, quality = 0.7) {
+        return new Promise((resolve, reject) => {
+          if (!file) {
+            resolve(null);
             return;
           }
-          // Release old tag
-          if (currentUserData?.nameTag) {
-            await remove(ref(db, 'nameTags/' + currentUserData.nameTag));
-          }
-          // Set new tag
-          await set(ref(db, 'nameTags/' + nameTag), currentUser.uid);
-        }
-
-        let photoURL = currentUserData?.photoURL || '';
-        if (profileAvatarFile) {
-          try {
-            const imgRef = storageRef(storage, `avatars/${currentUser.uid}/profile.jpg`);
-            await uploadBytes(imgRef, profileAvatarFile);
-            photoURL = await getDownloadURL(imgRef);
-          } catch (e) {
-            photoURL = profileAvatarBase64 || photoURL;
-          }
-        }
-
-        await updateProfile(auth.currentUser, { displayName: name, photoURL });
-        await update(ref(db, 'users/' + currentUser.uid), { name, nameTag, status, photoURL, lastSeen: Date.now() });
-
-        currentUserData = { ...currentUserData, name, nameTag, status, photoURL };
-        allUsers[currentUser.uid] = currentUserData;
-
-        // Update UI
-        document.getElementById('headerStatus').textContent = '@' + nameTag;
-        document.getElementById('myAvatarSmall').src = photoURL || '/default-avatar.png';
-        document.getElementById('myStatusDot').className = `absolute -bottom-1 -right-1 w-3 h-3 rounded-full border border-[#2d4a2d] ${getStatusClass(status)}`;
-
-        successEl.textContent = '✓ Profil berhasil disimpan!';
-        successEl.classList.remove('hidden');
-        alertEl.classList.add('hidden');
-        profileAvatarFile = null;
-
-        setTimeout(() => {
-          document.getElementById('profileModal').classList.add('hidden');
-        }, 1500);
-      } catch (err) {
-        alertEl.textContent = '⚠ Gagal menyimpan: ' + err.message;
-        alertEl.classList.remove('hidden');
-      }
-      btn.textContent = '▶ SIMPAN';
-      btn.disabled = false;
-    });
-
-    // =============================================
-    // CREATE GROUP
-    // =============================================
-    document.getElementById('createGroupBtn').addEventListener('click', () => {
-      openCreateGroupModal();
-    });
-
-    async function openCreateGroupModal() {
-      document.getElementById('createGroupModal').classList.remove('hidden');
-      document.getElementById('groupNameInput').value = '';
-      document.getElementById('groupSearchInput').value = '';
-      selectedGroupMembers = [];
-      renderSelectedMembers();
-      await loadGroupUserSearch('');
-    }
-
-    document.getElementById('closeGroupModalBtn').addEventListener('click', () => {
-      document.getElementById('createGroupModal').classList.add('hidden');
-    });
-
-    document.getElementById('groupSearchInput').addEventListener('input', async (e) => {
-      await loadGroupUserSearch(e.target.value);
-    });
-
-    async function loadGroupUserSearch(search) {
-      const container = document.getElementById('groupUserList');
-      const usersSnap = await get(ref(db, 'users'));
-      if (!usersSnap.exists()) {
-        container.innerHTML = '<p class="text-center text-[#4a6a4a] text-xs py-3">Tidak ada pengguna</p>';
-        return;
-      }
-
-      const users = usersSnap.val();
-      const filtered = Object.entries(users).filter(([uid, u]) => {
-        if (uid === currentUser.uid) return false;
-        if (!search) return true;
-        return u.name?.toLowerCase().includes(search.toLowerCase()) ||
-               u.nameTag?.toLowerCase().includes(search.toLowerCase());
-      });
-
-      container.innerHTML = '';
-      filtered.forEach(([uid, u]) => {
-        const isSelected = selectedGroupMembers.some(m => m.uid === uid);
-        const div = document.createElement('div');
-        div.className = `flex items-center gap-2 px-3 py-2 border-b border-[#2d4a2d] cursor-pointer ${isSelected ? 'bg-[#d0ddb8]' : 'hover:bg-[#d0ddb8]'}`;
-        div.innerHTML = `
-          <img src="${u.photoURL || '/default-avatar.png'}" class="w-7 h-7 object-cover border border-[#2d4a2d]" onerror="this.src='/default-avatar.png'" />
-          <div class="flex-1">
-            <p class="text-xs font-bold text-[#2d4a2d]">${escHtml(u.name)}</p>
-            <p class="text-xs text-[#4a6a4a]">@${escHtml(u.nameTag || '')}</p>
-          </div>
-          <span class="text-xs font-bold ${isSelected ? 'text-[#8b0000]' : 'text-[#2d4a2d]'}">${isSelected ? '✓ HAPUS' : '+ TAMBAH'}</span>
-        `;
-        div.addEventListener('click', () => {
-          if (isSelected) {
-            selectedGroupMembers = selectedGroupMembers.filter(m => m.uid !== uid);
-          } else {
-            selectedGroupMembers.push({ uid, name: u.name, nameTag: u.nameTag || '', photoURL: u.photoURL || '' });
-          }
-          renderSelectedMembers();
-          loadGroupUserSearch(search);
+          const reader = new FileReader();
+          reader.onload = (ev) => {
+            const img = new Image();
+            img.onload = () => {
+              const canvas = document.createElement("canvas");
+              let w = img.width,
+                h = img.height;
+              if (w > h) {
+                if (w > maxSize) {
+                  h = (h * maxSize) / w;
+                  w = maxSize;
+                }
+              } else {
+                if (h > maxSize) {
+                  w = (w * maxSize) / h;
+                  h = maxSize;
+                }
+              }
+              canvas.width = w;
+              canvas.height = h;
+              canvas.getContext("2d").drawImage(img, 0, 0, w, h);
+              resolve(canvas.toDataURL("image/jpeg", quality));
+            };
+            img.onerror = reject;
+            img.src = ev.target.result;
+          };
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
         });
-        container.appendChild(div);
-      });
-
-      if (filtered.length === 0) {
-        container.innerHTML = '<p class="text-center text-[#4a6a4a] text-xs py-3">Tidak ada hasil</p>';
-      }
-    }
-
-    function renderSelectedMembers() {
-      const container = document.getElementById('selectedMembers');
-      if (selectedGroupMembers.length === 0) {
-        container.innerHTML = '<p class="text-[#8fb88f] text-xs">Belum ada anggota dipilih</p>';
-        return;
-      }
-      container.innerHTML = '';
-      selectedGroupMembers.forEach(m => {
-        const span = document.createElement('span');
-        span.className = 'flex items-center gap-1 bg-[#2d4a2d] text-[#c8d8a8] text-xs px-2 py-1 cursor-pointer';
-        span.innerHTML = `@${escHtml(m.nameTag || m.name)} <span class="hover:text-red-300">✕</span>`;
-        span.addEventListener('click', () => {
-          selectedGroupMembers = selectedGroupMembers.filter(sm => sm.uid !== m.uid);
-          renderSelectedMembers();
-          loadGroupUserSearch(document.getElementById('groupSearchInput').value);
-        });
-        container.appendChild(span);
-      });
-    }
-
-    document.getElementById('createGroupConfirmBtn').addEventListener('click', async () => {
-      const groupName = document.getElementById('groupNameInput').value.trim();
-      const alertEl = document.getElementById('groupAlertBox');
-
-      if (!groupName) {
-        alertEl.textContent = '⚠ Nama grup wajib diisi.';
-        alertEl.classList.remove('hidden');
-        return;
-      }
-      if (selectedGroupMembers.length === 0) {
-        alertEl.textContent = '⚠ Tambahkan minimal 1 anggota.';
-        alertEl.classList.remove('hidden');
-        return;
       }
 
-      const btn = document.getElementById('createGroupConfirmBtn');
-      btn.textContent = '⌛ MEMBUAT...';
-      btn.disabled = true;
+      // ============================================
+      // STATE
+      // ============================================
+      let currentUser = null;
+      let currentUserData = null;
+      let currentChat = null;
+      let allUsers = {};
+      let selectedGroupMembers = [];
+      let pendingImageBase64 = null;
+      let pendingImageName = null;
+      let activeTab = "private";
+      let messageListeners = {};
+      let chatListeners = {};
+      let unreadCounts = {};
+      let groupMembers = {};
+      let mentionQuery = null;
+      let mentionStartPos = null;
 
-      const members = { [currentUser.uid]: true };
-      selectedGroupMembers.forEach(m => { members[m.uid] = true; });
-
-      try {
-        const groupRef = push(ref(db, 'groups'));
-        const groupId = groupRef.key;
-        await set(groupRef, {
-          id: groupId,
-          name: groupName,
-          createdBy: currentUser.uid,
-          createdAt: Date.now(),
-          members,
-          lastMessage: { text: '', timestamp: Date.now() }
-        });
-
-        // System message
-        await push(ref(db, `groupMessages/${groupId}`), {
-          type: 'system',
-          text: `Grup "${groupName}" dibuat oleh ${currentUserData?.name || 'pengguna'}`,
-          timestamp: Date.now(),
-          senderId: 'system'
-        });
-
-        document.getElementById('createGroupModal').classList.add('hidden');
-        selectedGroupMembers = [];
-
-        // Switch to group tab and open
-        switchTab('group');
-        openGroupChat(groupId);
-      } catch (err) {
-        alertEl.textContent = '⚠ Gagal membuat grup: ' + err.message;
-        alertEl.classList.remove('hidden');
-      }
-      btn.textContent = '▶ BUAT GRUP';
-      btn.disabled = false;
-    });
-
-    // =============================================
-    // RIGHT PANEL - GROUP INFO
-    // =============================================
-    document.getElementById('chatInfoBtn').addEventListener('click', () => {
-      const rp = document.getElementById('rightPanel');
-      rp.classList.toggle('hidden');
-      if (!rp.classList.contains('hidden') && currentChat?.type === 'group') {
-        rp.style.display = 'flex';
-      }
-    });
-
-    document.getElementById('closeRightPanel').addEventListener('click', () => {
-      document.getElementById('rightPanel').classList.add('hidden');
-      document.getElementById('rightPanel').style.display = '';
-    });
-
-    async function loadRightPanelGroupInfo(groupId, gdata) {
-      const rp = document.getElementById('rightPanelContent');
-      const members = gdata.members || {};
-      const memberEntries = Object.keys(members);
-
-      let html = `
-        <div class="mb-4 border-b-2 border-[#2d4a2d] pb-3">
-          <div class="w-16 h-16 bg-[#2d4a2d] flex items-center justify-center text-[#c8d8a8] font-bold text-2xl mx-auto mb-2">
-            ${gdata.name.charAt(0).toUpperCase()}
-          </div>
-          <h4 class="text-[#2d4a2d] font-bold text-sm text-center tracking-wider">${escHtml(gdata.name)}</h4>
-          <p class="text-center text-[#4a6a4a] text-xs">${memberEntries.length} anggota</p>
-        </div>
-        <div class="mb-3">
-          <p class="font-bold text-[#2d4a2d] tracking-wider mb-2 border-b border-dashed border-[#2d4a2d] pb-1">▶ ANGGOTA:</p>
-      `;
-
-      for (const uid of memberEntries) {
-        const u = allUsers[uid] || {};
-        const isCreator = uid === gdata.createdBy;
-        html += `
-          <div class="flex items-center gap-2 py-2 border-b border-[#c8d8a8]">
-            <div class="relative">
-              <img src="${u.photoURL || '/default-avatar.png'}" class="w-8 h-8 object-cover border border-[#2d4a2d]" onerror="this.src='/default-avatar.png'" />
-              <span class="absolute -bottom-1 -right-1 w-2 h-2 rounded-full ${getStatusClass(u.status || 'offline')} border border-[#2d4a2d]"></span>
-            </div>
-            <div class="flex-1 min-w-0">
-              <p class="font-bold text-[#2d4a2d] text-xs truncate">${escHtml(u.name || 'Unknown')}</p>
-              <p class="text-[#4a6a4a] text-xs">@${escHtml(u.nameTag || '')} ${isCreator ? '<span class="nametag-badge">ADMIN</span>' : ''}</p>
-            </div>
-          </div>
-        `;
-      }
-      html += '</div>';
-
-      if (gdata.createdBy === currentUser.uid) {
-        html += `
-          <button onclick="window.addGroupMemberUI('${groupId}')" class="classic-btn bg-[#c8d8a8] text-[#2d4a2d] w-full py-1 text-xs font-bold tracking-wider mb-2">
-            + TAMBAH ANGGOTA
-          </button>
-          <button onclick="window.deleteGroup('${groupId}')" class="classic-btn bg-[#8b0000] text-white w-full py-1 text-xs font-bold tracking-wider">
-            ✕ HAPUS GRUP
-          </button>
-        `;
-      } else {
-        html += `
-          <button onclick="window.leaveGroup('${groupId}')" class="classic-btn bg-[#8b0000] text-white w-full py-1 text-xs font-bold tracking-wider">
-            ▶ KELUAR GRUP
-          </button>
-        `;
-      }
-
-      rp.innerHTML = html;
-    }
-
-    window.deleteGroup = async (groupId) => {
-      if (!confirm('Hapus grup ini? Semua pesan akan hilang.')) return;
-      try {
-        await remove(ref(db, 'groups/' + groupId));
-        await remove(ref(db, 'groupMessages/' + groupId));
-        document.getElementById('noChatSelected').classList.remove('hidden');
-        document.getElementById('chatArea').style.display = 'none';
-        document.getElementById('chatArea').classList.add('hidden');
-        document.getElementById('rightPanel').classList.add('hidden');
-        currentChat = null;
-        renderChatList();
-      } catch (err) {
-        alert('Gagal menghapus grup: ' + err.message);
-      }
-    };
-
-    window.leaveGroup = async (groupId) => {
-      if (!confirm('Keluar dari grup ini?')) return;
-      try {
-        await remove(ref(db, `groups/${groupId}/members/${currentUser.uid}`));
-        await push(ref(db, `groupMessages/${groupId}`), {
-          type: 'system',
-          text: `${currentUserData?.name || 'Seseorang'} meninggalkan grup`,
-          timestamp: Date.now(),
-          senderId: 'system'
-        });
-        document.getElementById('noChatSelected').classList.remove('hidden');
-        document.getElementById('chatArea').style.display = 'none';
-        document.getElementById('chatArea').classList.add('hidden');
-        document.getElementById('rightPanel').classList.add('hidden');
-        currentChat = null;
-        renderChatList();
-      } catch (err) {
-        alert('Gagal keluar grup: ' + err.message);
-      }
-    };
-
-    window.addGroupMemberUI = async (groupId) => {
-      const nameTag = prompt('Masukkan name tag anggota baru (tanpa @):');
-      if (!nameTag) return;
-      try {
-        const tagSnap = await get(ref(db, 'nameTags/' + nameTag.toLowerCase()));
-        if (!tagSnap.exists()) {
-          alert('Pengguna @' + nameTag + ' tidak ditemukan.');
+      // ============================================
+      // INIT & AUTH
+      // ============================================
+      onAuthStateChanged(auth, async (user) => {
+        if (!user) {
+          window.location.href = "login.html";
           return;
         }
-        const uid = tagSnap.val();
-        await update(ref(db, 'groups/' + groupId + '/members'), { [uid]: true });
-        await push(ref(db, 'groupMessages/' + groupId), {
-          type: 'system',
-          text: `${allUsers[uid]?.name || nameTag} bergabung ke grup`,
-          timestamp: Date.now(),
-          senderId: 'system'
-        });
-        const snap = await get(ref(db, 'groups/' + groupId));
+        currentUser = user;
+        await loadCurrentUserData();
+        updateHeaderUI();
+        setOnlineStatus(true);
+        setupPresence();
+        loadChatList();
+      });
+
+      async function loadCurrentUserData() {
+        const snap = await get(ref(db, "users/" + currentUser.uid));
         if (snap.exists()) {
-          groupMembers = snap.val().members || {};
-          loadRightPanelGroupInfo(groupId, snap.val());
+          currentUserData = snap.val();
+        } else {
+          currentUserData = {
+            uid: currentUser.uid,
+            name: currentUser.displayName || currentUser.email.split("@")[0],
+            nameTag: currentUser.email
+              .split("@")[0]
+              .toLowerCase()
+              .replace(/[^a-z0-9_]/g, "_"),
+            email: currentUser.email,
+            photoURL: currentUser.photoURL || "",
+            status: "online",
+            lastSeen: Date.now(),
+            createdAt: Date.now(),
+          };
+          await set(ref(db, "users/" + currentUser.uid), currentUserData);
         }
-        alert('Berhasil menambahkan @' + nameTag);
-      } catch (err) {
-        alert('Gagal: ' + err.message);
       }
-    };
 
-    // =============================================
-    // TABS
-    // =============================================
-    document.getElementById('tabPrivate').addEventListener('click', () => switchTab('private'));
-    document.getElementById('tabGroup').addEventListener('click', () => switchTab('group'));
+      function updateHeaderUI() {
+        document.getElementById("headerStatus").textContent =
+          "@" + (currentUserData?.nameTag || "...");
+        const avatarEl = document.getElementById("myAvatarSmall");
+        if (currentUserData?.photoURL) avatarEl.src = currentUserData.photoURL;
+      }
 
-    function switchTab(tab) {
-      activeTab = tab;
-      document.getElementById('tabPrivate').className = `tab-btn flex-1 py-2 text-xs font-bold tracking-wider ${tab === 'private' ? 'active' : ''}`;
-      document.getElementById('tabGroup').className = `tab-btn flex-1 py-2 text-xs font-bold tracking-wider ${tab === 'group' ? 'active' : ''}`;
-      renderChatList();
-    }
+      // ============================================
+      // PRESENCE
+      // ============================================
+      function setOnlineStatus(isOnline) {
+        if (!currentUser) return;
+        update(ref(db, "users/" + currentUser.uid), {
+          status: isOnline ? currentUserData?.status || "online" : "offline",
+          lastSeen: Date.now(),
+        });
+      }
 
-    // =============================================
-    // SEARCH
-    // =============================================
-    document.getElementById('searchInput').addEventListener('input', () => {
-      renderChatList();
-    });
+      function setupPresence() {
+        onValue(ref(db, ".info/connected"), (snap) => {
+          if (snap.val() === true) {
+            const userRef = ref(db, "users/" + currentUser.uid);
+            onDisconnect(userRef).update({
+              status: "offline",
+              lastSeen: serverTimestamp(),
+            });
+            update(userRef, {
+              status: currentUserData?.status || "online",
+              lastSeen: Date.now(),
+            });
+          }
+        });
+      }
 
-    // =============================================
-    // LOGOUT
-    // =============================================
-    document.getElementById('logoutBtn').addEventListener('click', async () => {
-      if (!confirm('Yakin ingin keluar?')) return;
-      await update(ref(db, 'users/' + currentUser.uid), { status: 'offline', lastSeen: Date.now() });
-      await signOut(auth);
-      window.location.href = 'login.html';
-    });
+      // ============================================
+      // LOAD ALL USERS (live)
+      // ============================================
+      onValue(ref(db, "users"), (snap) => {
+        if (snap.exists()) {
+          allUsers = snap.val();
+          if (currentChat?.type === "private") updateChatHeader();
+        }
+      });
 
-    // =============================================
-    // MOBILE NAVIGATION
-    // =============================================
-    document.getElementById('mobileMenuBtn').addEventListener('click', () => {
-      document.getElementById('leftPanel').classList.toggle('open');
-    });
+      // ============================================
+      // CHAT LIST
+      // ============================================
+      function loadChatList() {
+        onValue(ref(db, "conversations"), () => renderChatList());
+        onValue(ref(db, "groups"), () => renderChatList());
+      }
 
-    document.getElementById('mobileBackBtn').addEventListener('click', () => {
-      document.getElementById('chatArea').style.display = 'none';
-      document.getElementById('chatArea').classList.add('hidden');
-      document.getElementById('noChatSelected').classList.remove('hidden');
-    });
+      async function renderChatList() {
+        const chatList = document.getElementById("chatList");
+        const searchVal = document
+          .getElementById("searchInput")
+          .value.toLowerCase()
+          .trim();
 
-    function closeMobileSidebar() {
-      document.getElementById('leftPanel').classList.remove('open');
-    }
+        if (activeTab === "private") {
+          const snap = await get(ref(db, "conversations"));
+          const items = [];
 
-    // =============================================
-    // UTILITIES
-    // =============================================
-    function getConvId(uid1, uid2) {
-      return [uid1, uid2].sort().join('_');
-    }
+          if (snap.exists()) {
+            const convs = snap.val();
+            for (const [convId, convData] of Object.entries(convs)) {
+              if (!convId.includes(currentUser.uid)) continue;
+              const otherUid = convId
+                .replace(currentUser.uid + "_", "")
+                .replace("_" + currentUser.uid, "");
+              const otherUser = allUsers[otherUid];
+              if (!otherUser) continue;
+              if (
+                searchVal &&
+                !otherUser.name.toLowerCase().includes(searchVal) &&
+                !otherUser.nameTag?.toLowerCase().includes(searchVal)
+              )
+                continue;
+              const lastMsg = convData.lastMessage || {};
+              items.push({
+                id: convId,
+                otherUid,
+                name: otherUser.name,
+                nameTag: otherUser.nameTag || "",
+                avatar: otherUser.photoURL || "",
+                status: otherUser.status || "offline",
+                lastMsg:
+                  lastMsg.text || (lastMsg.type === "image" ? "📷 Gambar" : ""),
+                lastTime: lastMsg.timestamp || 0,
+                unread: unreadCounts[convId] || 0,
+              });
+            }
+          }
 
-    function escHtml(str) {
-      if (!str) return '';
-      return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-    }
+          if (items.length === 0 || searchVal) {
+            const usersSnap = await get(ref(db, "users"));
+            if (usersSnap.exists()) {
+              const users = usersSnap.val();
+              for (const [uid, u] of Object.entries(users)) {
+                if (uid === currentUser.uid) continue;
+                if (
+                  searchVal &&
+                  !u.name.toLowerCase().includes(searchVal) &&
+                  !u.nameTag?.toLowerCase().includes(searchVal)
+                )
+                  continue;
+                const convId = getConvId(currentUser.uid, uid);
+                if (items.find((i) => i.id === convId)) continue;
+                items.push({
+                  id: convId,
+                  otherUid: uid,
+                  name: u.name,
+                  nameTag: u.nameTag || "",
+                  avatar: u.photoURL || "",
+                  status: u.status || "offline",
+                  lastMsg: "Mulai percakapan...",
+                  lastTime: 0,
+                  unread: 0,
+                });
+              }
+            }
+          }
 
-    // =============================================
-    // WINDOW VISIBILITY - Update status
-    // =============================================
-    document.addEventListener('visibilitychange', () => {
-      if (document.hidden) {
-        update(ref(db, 'users/' + currentUser?.uid), { status: 'away', lastSeen: Date.now() });
-      } else {
-        if (currentUser) {
-          update(ref(db, 'users/' + currentUser.uid), {
-            status: currentUserData?.status || 'online',
-            lastSeen: Date.now()
+          items.sort((a, b) => b.lastTime - a.lastTime);
+          renderPrivateList(chatList, items);
+        } else {
+          const snap = await get(ref(db, "groups"));
+          const items = [];
+          if (snap.exists()) {
+            const groups = snap.val();
+            for (const [gid, gdata] of Object.entries(groups)) {
+              if (!gdata.members || !gdata.members[currentUser.uid]) continue;
+              if (searchVal && !gdata.name.toLowerCase().includes(searchVal))
+                continue;
+              const lastMsg = gdata.lastMessage || {};
+              items.push({
+                id: gid,
+                name: gdata.name,
+                avatar: gdata.avatar || "",
+                memberCount: Object.keys(gdata.members || {}).length,
+                lastMsg:
+                  lastMsg.text || (lastMsg.type === "image" ? "📷 Gambar" : ""),
+                lastTime: lastMsg.timestamp || 0,
+                createdBy: gdata.createdBy,
+              });
+            }
+          }
+          items.sort((a, b) => b.lastTime - a.lastTime);
+          renderGroupList(chatList, items);
+        }
+      }
+
+      function renderPrivateList(container, items) {
+        if (items.length === 0) {
+          container.innerHTML =
+            '<div class="px-4 py-6 text-center text-[#4a6a4a] text-xs"><p>[ TIDAK ADA PENGGUNA ]</p></div>';
+          return;
+        }
+        container.innerHTML = "";
+        items.forEach((item) => {
+          const div = document.createElement("div");
+          div.className =
+            "chat-item px-3 py-3 flex items-center gap-2" +
+            (currentChat?.id === item.id ? " active" : "");
+          div.innerHTML = `
+            <div class="relative flex-shrink-0">
+              <img src="${escHtml(item.avatar) || defaultAvatar(item.name)}" class="w-10 h-10 object-cover border-2 border-[#2d4a2d]" onerror="this.src='${defaultAvatar(item.name)}'" />
+              <span class="absolute -bottom-1 -right-1 w-3 h-3 rounded-full border border-[#2d4a2d] ${getStatusClass(item.status)}"></span>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center justify-between">
+                <span class="text-[#2d4a2d] font-bold text-xs truncate">${escHtml(item.name)}</span>
+                ${item.unread > 0 ? `<span class="unread-badge">${item.unread}</span>` : ""}
+              </div>
+              <p class="text-[#4a6a4a] text-xs truncate">${item.nameTag ? "@" + item.nameTag + " · " : ""}${escHtml(item.lastMsg || "")}</p>
+            </div>`;
+          div.addEventListener("click", () => openPrivateChat(item.otherUid));
+          container.appendChild(div);
+        });
+      }
+
+      function renderGroupList(container, items) {
+        if (items.length === 0) {
+          container.innerHTML =
+            '<div class="px-4 py-6 text-center text-[#4a6a4a] text-xs"><p>[ BELUM ADA GRUP ]</p><p class="mt-1">Buat grup dengan tombol +GRP</p></div>';
+          return;
+        }
+        container.innerHTML = "";
+        items.forEach((item) => {
+          const div = document.createElement("div");
+          div.className =
+            "chat-item px-3 py-3 flex items-center gap-2" +
+            (currentChat?.id === item.id ? " active" : "");
+          div.innerHTML = `
+            <div class="relative flex-shrink-0">
+              <div class="w-10 h-10 border-2 border-[#2d4a2d] bg-[#2d4a2d] flex items-center justify-center text-[#c8d8a8] font-bold text-sm">
+                ${item.name.charAt(0).toUpperCase()}
+              </div>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center justify-between">
+                <span class="text-[#2d4a2d] font-bold text-xs truncate">👥 ${escHtml(item.name)}</span>
+                <span class="text-[#8fb88f] text-xs">${item.memberCount} anggota</span>
+              </div>
+              <p class="text-[#4a6a4a] text-xs truncate">${escHtml(item.lastMsg || "Belum ada pesan")}</p>
+            </div>`;
+          div.addEventListener("click", () => openGroupChat(item.id));
+          container.appendChild(div);
+        });
+      }
+
+      function defaultAvatar(name) {
+        return (
+          "https://ui-avatars.com/api/?name=" +
+          encodeURIComponent(name || "U") +
+          "&background=d0ddb8&color=2d4a2d&size=40&bold=true"
+        );
+      }
+
+      function getStatusClass(status) {
+        if (status === "online") return "status-online";
+        if (status === "away") return "bg-yellow-500";
+        if (status === "busy") return "bg-red-600";
+        return "status-offline";
+      }
+
+      function getStatusLabel(status) {
+        if (status === "online") return "🟢 Online";
+        if (status === "away") return "🟡 Pergi";
+        if (status === "busy") return "🔴 Sibuk";
+        return "⚫ Offline";
+      }
+
+      // ============================================
+      // OPEN PRIVATE CHAT
+      // ============================================
+      async function openPrivateChat(otherUid) {
+        const convId = getConvId(currentUser.uid, otherUid);
+        const otherUser = allUsers[otherUid] || {};
+        currentChat = {
+          type: "private",
+          id: convId,
+          otherUid,
+          name: otherUser.name || "Unknown",
+          avatar: otherUser.photoURL || "",
+          nameTag: otherUser.nameTag || "",
+        };
+        groupMembers = {};
+
+        const convSnap = await get(ref(db, "conversations/" + convId));
+        if (!convSnap.exists()) {
+          await set(ref(db, "conversations/" + convId), {
+            participants: {[currentUser.uid]: true, [otherUid]: true},
+            lastMessage: {text: "", timestamp: Date.now()},
+            createdAt: Date.now(),
           });
         }
+        showChatArea();
+        updateChatHeader();
+        loadMessages(convId, "private");
+        renderChatList();
+        closeMobileSidebar();
       }
-    });
 
-    // Periodic refresh chat list
-    setInterval(() => {
-      if (currentUser) renderChatList();
-    }, 15000);
-  </script>
-</body>
+      // ============================================
+      // OPEN GROUP CHAT
+      // ============================================
+      async function openGroupChat(groupId) {
+        const snap = await get(ref(db, "groups/" + groupId));
+        if (!snap.exists()) return;
+        const gdata = snap.val();
+        currentChat = {
+          type: "group",
+          id: groupId,
+          name: gdata.name,
+          avatar: gdata.avatar || "",
+          createdBy: gdata.createdBy,
+        };
+        groupMembers = gdata.members || {};
+        showChatArea();
+        updateChatHeader();
+        loadMessages(groupId, "group");
+        renderChatList();
+        closeMobileSidebar();
+        loadRightPanelGroupInfo(groupId, gdata);
+      }
+
+      function showChatArea() {
+        document.getElementById("noChatSelected").classList.add("hidden");
+        document.getElementById("chatArea").classList.remove("hidden");
+        document.getElementById("chatArea").style.display = "flex";
+      }
+
+      function updateChatHeader() {
+        if (!currentChat) return;
+        document.getElementById("chatName").textContent = currentChat.name;
+        const avatarEl = document.getElementById("chatAvatar");
+        const statusDot = document.getElementById("chatStatusDot");
+
+        if (currentChat.type === "private") {
+          const otherUser = allUsers[currentChat.otherUid] || {};
+          avatarEl.src = otherUser.photoURL || defaultAvatar(otherUser.name);
+          avatarEl.onerror = () => {
+            avatarEl.src = defaultAvatar(currentChat.name);
+          };
+          const status = otherUser.status || "offline";
+          statusDot.className = `absolute -bottom-1 -right-1 w-3 h-3 rounded-full border border-[#2d4a2d] ${getStatusClass(status)}`;
+          document.getElementById("chatSubtitle").textContent =
+            getStatusLabel(status) +
+            (currentChat.nameTag ? " · @" + currentChat.nameTag : "");
+        } else {
+          avatarEl.src = defaultAvatar(currentChat.name);
+          statusDot.className =
+            "absolute -bottom-1 -right-1 w-3 h-3 rounded-full border border-[#2d4a2d] status-online";
+          document.getElementById("chatSubtitle").textContent =
+            `👥 ${Object.keys(groupMembers).length} anggota`;
+        }
+      }
+
+      // ============================================
+      // MESSAGES
+      // ============================================
+      function loadMessages(chatId, type) {
+        Object.keys(messageListeners).forEach((key) => {
+          off(messageListeners[key]);
+        });
+        messageListeners = {};
+
+        const msgPath =
+          type === "group" ? `groupMessages/${chatId}` : `messages/${chatId}`;
+        const msgRef = query(
+          ref(db, msgPath),
+          orderByChild("timestamp"),
+          limitToLast(100),
+        );
+        const container = document.getElementById("messagesContainer");
+        container.innerHTML =
+          '<div class="text-center text-[#4a6a4a] text-xs py-4 blink">[ MEMUAT PESAN... ]</div>';
+
+        messageListeners["current"] = msgRef;
+        onValue(msgRef, (snap) => {
+          const msgs = [];
+          if (snap.exists())
+            snap.forEach((child) => msgs.push({id: child.key, ...child.val()}));
+          renderMessages(msgs, container);
+        });
+      }
+
+      function renderMessages(msgs, container) {
+        if (msgs.length === 0) {
+          container.innerHTML =
+            '<div class="text-center text-[#4a6a4a] text-xs py-8"><div class="classic-border inline-block px-4 py-2 bg-[#e8f0d8]">[ BELUM ADA PESAN ]<br><span class="text-[#8fb88f]">Mulai percakapan sekarang!</span></div></div>';
+          return;
+        }
+        container.innerHTML = "";
+        let lastDate = "";
+
+        msgs.forEach((msg) => {
+          const isMe = msg.senderId === currentUser.uid;
+          const date = msg.timestamp ? new Date(msg.timestamp) : new Date();
+          const dateStr = date.toLocaleDateString("id-ID", {
+            weekday: "short",
+            day: "numeric",
+            month: "short",
+          });
+          const timeStr = date.toLocaleTimeString("id-ID", {
+            hour: "2-digit",
+            minute: "2-digit",
+          });
+
+          if (dateStr !== lastDate) {
+            lastDate = dateStr;
+            const sep = document.createElement("div");
+            sep.className = "flex items-center justify-center my-3";
+            sep.innerHTML = `<span class="text-[#4a6a4a] text-xs border-2 border-dashed border-[#4a6a4a] px-3 py-1 bg-[#d0ddb8]">— ${dateStr} —</span>`;
+            container.appendChild(sep);
+          }
+
+          if (msg.type === "system") {
+            const div = document.createElement("div");
+            div.className = "flex justify-center my-1";
+            div.innerHTML = `<span class="msg-bubble-system text-xs px-3 py-1 max-w-xs text-center">${escHtml(msg.text)}</span>`;
+            container.appendChild(div);
+            return;
+          }
+
+          const senderData = allUsers[msg.senderId] || {
+            name: "Unknown",
+            nameTag: "",
+          };
+          const div = document.createElement("div");
+          div.className = `flex ${isMe ? "justify-end" : "justify-start"} mb-2 items-end gap-2`;
+
+          let contentHtml = "";
+          if (msg.type === "image") {
+            const safeUrl = escHtml(msg.imageUrl || "");
+            contentHtml = `
+              <img src="${safeUrl}" class="img-msg" alt="gambar" onclick="window.openImageView('${safeUrl}')"
+                onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" />
+              <p class="hidden text-xs text-red-500">[Gambar tidak tersedia]</p>
+              ${msg.text ? `<p class="text-xs mt-1">${parseMentions(escHtml(msg.text))}</p>` : ""}`;
+          } else {
+            contentHtml = `<p class="text-sm leading-relaxed break-words">${parseMentions(escHtml(msg.text || ""))}</p>`;
+          }
+
+          let senderInfo = "";
+          if (!isMe && currentChat?.type === "group") {
+            senderInfo = `<p class="text-xs font-bold mb-1 text-[#2d4a2d]">${escHtml(senderData.name)}<span class="nametag-badge ml-1">@${escHtml(senderData.nameTag || "")}</span></p>`;
+          }
+
+          if (isMe) {
+            div.innerHTML = `
+              <div class="max-w-xs lg:max-w-md">
+                ${senderInfo}
+                <div class="msg-bubble-me px-3 py-2">${contentHtml}</div>
+                <p class="text-right text-xs text-[#4a6a4a] mt-1">${timeStr} ✓</p>
+              </div>`;
+          } else {
+            div.innerHTML = `
+              <img src="${escHtml(senderData.photoURL || defaultAvatar(senderData.name))}" class="w-7 h-7 object-cover border border-[#2d4a2d] flex-shrink-0 mb-5" onerror="this.src='${defaultAvatar(senderData.name)}'" />
+              <div class="max-w-xs lg:max-w-md">
+                ${senderInfo}
+                <div class="msg-bubble-other px-3 py-2">${contentHtml}</div>
+                <p class="text-xs text-[#4a6a4a] mt-1">${timeStr}</p>
+              </div>`;
+          }
+          container.appendChild(div);
+        });
+        container.scrollTop = container.scrollHeight;
+      }
+
+      function parseMentions(text) {
+        return text.replace(
+          /@([a-z0-9_]+)/gi,
+          (match) => `<span class="mention-highlight">${match}</span>`,
+        );
+      }
+
+      // ============================================
+      // SEND MESSAGE
+      // ============================================
+      async function sendMessage() {
+        if (!currentChat) return;
+        const input = document.getElementById("messageInput");
+        const text = input.value.trim();
+        if (!text && !pendingImageBase64) return;
+
+        const msgData = {
+          senderId: currentUser.uid,
+          senderName:
+            currentUserData?.name || currentUser.displayName || "Unknown",
+          timestamp: Date.now(),
+          type: "text",
+        };
+
+        const msgPath =
+          currentChat.type === "group"
+            ? `groupMessages/${currentChat.id}`
+            : `messages/${currentChat.id}`;
+        const convBasePath =
+          currentChat.type === "group"
+            ? `groups/${currentChat.id}`
+            : `conversations/${currentChat.id}`;
+
+        try {
+          if (pendingImageBase64) {
+            // Store image as base64 directly in Realtime DB
+            const imgMsg = {
+              ...msgData,
+              type: "image",
+              imageUrl: pendingImageBase64,
+              text: text || "",
+            };
+            await push(ref(db, msgPath), imgMsg);
+            await update(ref(db, convBasePath), {
+              lastMessage: {
+                type: "image",
+                text: "📷 Gambar",
+                timestamp: Date.now(),
+              },
+            });
+            clearImagePreview();
+          } else {
+            const textMsg = {...msgData, text};
+            await push(ref(db, msgPath), textMsg);
+            await update(ref(db, convBasePath), {
+              lastMessage: {type: "text", text, timestamp: Date.now()},
+            });
+          }
+          input.value = "";
+          input.style.height = "auto";
+          hideMentionSuggestions();
+        } catch (err) {
+          console.error("Send error:", err);
+          alert("Gagal mengirim pesan: " + err.message);
+        }
+      }
+
+      // ============================================
+      // IMAGE HANDLING (base64 only, no Storage)
+      // ============================================
+      document
+        .getElementById("attachImageBtn")
+        .addEventListener("click", () => {
+          document.getElementById("imageInput").click();
+        });
+
+      document
+        .getElementById("imageInput")
+        .addEventListener("change", async (e) => {
+          const file = e.target.files[0];
+          if (!file) return;
+          // Limit to 300KB original before resize
+          if (file.size > 3 * 1024 * 1024) {
+            alert("Ukuran gambar maksimal 3MB.");
+            return;
+          }
+          try {
+            // Resize to max 600px, quality 0.65 to keep base64 reasonable in DB
+            const base64 = await resizeImageToBase64(file, 600, 0.65);
+            pendingImageBase64 = base64;
+            pendingImageName = file.name;
+            document.getElementById("imagePreviewThumb").src = base64;
+            document.getElementById("imagePreviewName").textContent = file.name;
+            document
+              .getElementById("imagePreviewArea")
+              .classList.remove("hidden");
+          } catch (err) {
+            alert("Gagal memproses gambar.");
+          }
+        });
+
+      document
+        .getElementById("cancelImageBtn")
+        .addEventListener("click", clearImagePreview);
+
+      function clearImagePreview() {
+        pendingImageBase64 = null;
+        pendingImageName = null;
+        document.getElementById("imageInput").value = "";
+        document.getElementById("imagePreviewArea").classList.add("hidden");
+      }
+
+      // Image Viewer
+      window.openImageView = (url) => {
+        document.getElementById("imageViewFull").src = url;
+        document.getElementById("imageViewModal").classList.remove("hidden");
+      };
+      document
+        .getElementById("closeImageView")
+        .addEventListener("click", () => {
+          document.getElementById("imageViewModal").classList.add("hidden");
+        });
+      document
+        .getElementById("imageViewModal")
+        .addEventListener("click", (e) => {
+          if (e.target === document.getElementById("imageViewModal"))
+            document.getElementById("imageViewModal").classList.add("hidden");
+        });
+
+      // ============================================
+      // MESSAGE INPUT
+      // ============================================
+      const messageInput = document.getElementById("messageInput");
+      messageInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" && !e.shiftKey) {
+          e.preventDefault();
+          sendMessage();
+        }
+      });
+      messageInput.addEventListener("input", () => {
+        messageInput.style.height = "auto";
+        messageInput.style.height =
+          Math.min(messageInput.scrollHeight, 100) + "px";
+        const val = messageInput.value;
+        const cursor = messageInput.selectionStart;
+        const textBefore = val.substring(0, cursor);
+        const atIndex = textBefore.lastIndexOf("@");
+        if (atIndex !== -1 && currentChat?.type === "group") {
+          const q = textBefore.substring(atIndex + 1);
+          if (!/\s/.test(q)) {
+            mentionQuery = q;
+            mentionStartPos = atIndex;
+            showMentionSuggestions(q);
+            return;
+          }
+        }
+        hideMentionSuggestions();
+      });
+      document.getElementById("sendBtn").addEventListener("click", sendMessage);
+
+      // ============================================
+      // MENTION SUGGESTIONS
+      // ============================================
+      function showMentionSuggestions(query) {
+        if (!currentChat || currentChat.type !== "group") return;
+        const suggestions = Object.entries(groupMembers)
+          .filter(([uid]) => uid !== currentUser.uid && allUsers[uid])
+          .map(([uid]) => allUsers[uid])
+          .filter(
+            (u) =>
+              u &&
+              (u.nameTag?.toLowerCase().includes(query.toLowerCase()) ||
+                u.name?.toLowerCase().includes(query.toLowerCase())),
+          )
+          .slice(0, 5);
+        const container = document.getElementById("mentionSuggestions");
+        if (suggestions.length === 0) {
+          hideMentionSuggestions();
+          return;
+        }
+        container.innerHTML = "";
+        suggestions.forEach((u) => {
+          const div = document.createElement("div");
+          div.className =
+            "mention-suggestion flex items-center gap-2 px-3 py-2";
+          div.innerHTML = `
+            <img src="${escHtml(u.photoURL || defaultAvatar(u.name))}" class="w-6 h-6 object-cover border border-[#2d4a2d]" onerror="this.src='${defaultAvatar(u.name)}'" />
+            <span class="text-[#2d4a2d] text-xs font-bold">${escHtml(u.name)}</span>
+            <span class="text-[#4a6a4a] text-xs">@${escHtml(u.nameTag || "")}</span>`;
+          div.addEventListener("mousedown", (e) => {
+            e.preventDefault();
+            insertMention(u.nameTag || u.name);
+          });
+          container.appendChild(div);
+        });
+        container.classList.remove("hidden");
+      }
+
+      function hideMentionSuggestions() {
+        document.getElementById("mentionSuggestions").classList.add("hidden");
+        mentionQuery = null;
+        mentionStartPos = null;
+      }
+
+      function insertMention(nameTag) {
+        const val = messageInput.value;
+        const before = val.substring(0, mentionStartPos);
+        const after = val.substring(messageInput.selectionStart);
+        messageInput.value = before + "@" + nameTag + " " + after;
+        messageInput.focus();
+        const newPos = mentionStartPos + nameTag.length + 2;
+        messageInput.setSelectionRange(newPos, newPos);
+        hideMentionSuggestions();
+      }
+
+      // ============================================
+      // PROFILE MODAL
+      // ============================================
+      document
+        .getElementById("profileMenuBtn")
+        .addEventListener("click", openProfileModal);
+
+      function openProfileModal() {
+        document.getElementById("profileModal").classList.remove("hidden");
+        document.getElementById("profileName").value =
+          currentUserData?.name || "";
+        document.getElementById("profileNameTag").value =
+          currentUserData?.nameTag || "";
+        document.getElementById("profileEmail").textContent =
+          currentUser?.email || "";
+        document.getElementById("profileStatus").value =
+          currentUserData?.status || "online";
+        if (currentUserData?.photoURL)
+          document.getElementById("profileAvatarBig").src =
+            currentUserData.photoURL;
+        document.getElementById("profileAlertBox").classList.add("hidden");
+        document.getElementById("profileSuccessBox").classList.add("hidden");
+      }
+
+      document
+        .getElementById("closeProfileBtn")
+        .addEventListener("click", () => {
+          document.getElementById("profileModal").classList.add("hidden");
+        });
+
+      let profileAvatarBase64 = null;
+      document
+        .getElementById("uploadProfileAvatarBtn")
+        .addEventListener("click", () =>
+          document.getElementById("profileAvatarInput").click(),
+        );
+      document
+        .getElementById("changeProfileAvatarBtn")
+        .addEventListener("click", () =>
+          document.getElementById("profileAvatarInput").click(),
+        );
+
+      document
+        .getElementById("profileAvatarInput")
+        .addEventListener("change", async (e) => {
+          const file = e.target.files[0];
+          if (!file) return;
+          if (file.size > 500 * 1024) {
+            alert("Ukuran foto maksimal 500KB.");
+            return;
+          }
+          try {
+            profileAvatarBase64 = await resizeImageToBase64(file, 200, 0.75);
+            document.getElementById("profileAvatarBig").src =
+              profileAvatarBase64;
+          } catch (err) {
+            alert("Gagal memproses foto.");
+          }
+        });
+
+      document
+        .getElementById("saveProfileBtn")
+        .addEventListener("click", async () => {
+          const name = document.getElementById("profileName").value.trim();
+          const nameTag = document
+            .getElementById("profileNameTag")
+            .value.trim()
+            .toLowerCase();
+          const status = document.getElementById("profileStatus").value;
+          const alertEl = document.getElementById("profileAlertBox");
+          const successEl = document.getElementById("profileSuccessBox");
+
+          if (!name || !nameTag) {
+            alertEl.textContent = "⚠ Nama dan name tag wajib diisi.";
+            alertEl.classList.remove("hidden");
+            return;
+          }
+          if (!/^[a-z0-9_]+$/.test(nameTag)) {
+            alertEl.textContent =
+              "⚠ Name tag hanya boleh huruf kecil, angka, garis bawah.";
+            alertEl.classList.remove("hidden");
+            return;
+          }
+
+          const btn = document.getElementById("saveProfileBtn");
+          btn.textContent = "⌛ MENYIMPAN...";
+          btn.disabled = true;
+
+          try {
+            if (nameTag !== currentUserData?.nameTag) {
+              const tagSnap = await get(ref(db, "nameTags/" + nameTag));
+              if (tagSnap.exists() && tagSnap.val() !== currentUser.uid) {
+                alertEl.textContent =
+                  "⚠ Name tag @" + nameTag + " sudah digunakan.";
+                alertEl.classList.remove("hidden");
+                btn.textContent = "▶ SIMPAN";
+                btn.disabled = false;
+                return;
+              }
+              if (currentUserData?.nameTag)
+                await remove(ref(db, "nameTags/" + currentUserData.nameTag));
+              await set(ref(db, "nameTags/" + nameTag), currentUser.uid);
+            }
+
+            // Use base64 if new photo selected, otherwise keep existing
+            const photoURL =
+              profileAvatarBase64 ||
+              currentUserData?.photoURL ||
+              "https://ui-avatars.com/api/?name=" +
+                encodeURIComponent(name) +
+                "&background=d0ddb8&color=2d4a2d&size=200&bold=true";
+
+            // Auth profile uses generated URL (Auth photoURL has length limit)
+            const authPhotoURL =
+              profileAvatarBase64 && profileAvatarBase64.startsWith("data:")
+                ? "https://ui-avatars.com/api/?name=" +
+                  encodeURIComponent(name) +
+                  "&background=d0ddb8&color=2d4a2d&size=200&bold=true"
+                : photoURL;
+            await updateProfile(auth.currentUser, {
+              displayName: name,
+              photoURL: authPhotoURL,
+            });
+
+            await update(ref(db, "users/" + currentUser.uid), {
+              name,
+              nameTag,
+              status,
+              photoURL,
+              lastSeen: Date.now(),
+            });
+
+            currentUserData = {
+              ...currentUserData,
+              name,
+              nameTag,
+              status,
+              photoURL,
+            };
+            allUsers[currentUser.uid] = currentUserData;
+
+            document.getElementById("headerStatus").textContent = "@" + nameTag;
+            document.getElementById("myAvatarSmall").src = photoURL;
+            document.getElementById("myStatusDot").className =
+              `absolute -bottom-1 -right-1 w-3 h-3 rounded-full border border-[#2d4a2d] ${getStatusClass(status)}`;
+
+            successEl.textContent = "✓ Profil berhasil disimpan!";
+            successEl.classList.remove("hidden");
+            alertEl.classList.add("hidden");
+            profileAvatarBase64 = null;
+            setTimeout(() => {
+              document.getElementById("profileModal").classList.add("hidden");
+            }, 1500);
+          } catch (err) {
+            alertEl.textContent = "⚠ Gagal menyimpan: " + err.message;
+            alertEl.classList.remove("hidden");
+          }
+          btn.textContent = "▶ SIMPAN";
+          btn.disabled = false;
+        });
+
+      // ============================================
+      // CREATE GROUP
+      // ============================================
+      document
+        .getElementById("createGroupBtn")
+        .addEventListener("click", openCreateGroupModal);
+
+      async function openCreateGroupModal() {
+        document.getElementById("createGroupModal").classList.remove("hidden");
+        document.getElementById("groupNameInput").value = "";
+        document.getElementById("groupSearchInput").value = "";
+        selectedGroupMembers = [];
+        renderSelectedMembers();
+        await loadGroupUserSearch("");
+      }
+
+      document
+        .getElementById("closeGroupModalBtn")
+        .addEventListener("click", () => {
+          document.getElementById("createGroupModal").classList.add("hidden");
+        });
+
+      document
+        .getElementById("groupSearchInput")
+        .addEventListener("input", async (e) => {
+          await loadGroupUserSearch(e.target.value);
+        });
+
+      async function loadGroupUserSearch(search) {
+        const container = document.getElementById("groupUserList");
+        const usersSnap = await get(ref(db, "users"));
+        if (!usersSnap.exists()) {
+          container.innerHTML =
+            '<p class="text-center text-[#4a6a4a] text-xs py-3">Tidak ada pengguna</p>';
+          return;
+        }
+        const users = usersSnap.val();
+        const filtered = Object.entries(users).filter(([uid, u]) => {
+          if (uid === currentUser.uid) return false;
+          if (!search) return true;
+          return (
+            u.name?.toLowerCase().includes(search.toLowerCase()) ||
+            u.nameTag?.toLowerCase().includes(search.toLowerCase())
+          );
+        });
+        container.innerHTML = "";
+        filtered.forEach(([uid, u]) => {
+          const isSelected = selectedGroupMembers.some((m) => m.uid === uid);
+          const div = document.createElement("div");
+          div.className = `flex items-center gap-2 px-3 py-2 border-b border-[#2d4a2d] cursor-pointer ${isSelected ? "bg-[#d0ddb8]" : "hover:bg-[#d0ddb8]"}`;
+          div.innerHTML = `
+            <img src="${escHtml(u.photoURL || defaultAvatar(u.name))}" class="w-7 h-7 object-cover border border-[#2d4a2d]" onerror="this.src='${defaultAvatar(u.name)}'" />
+            <div class="flex-1">
+              <p class="text-xs font-bold text-[#2d4a2d]">${escHtml(u.name)}</p>
+              <p class="text-xs text-[#4a6a4a]">@${escHtml(u.nameTag || "")}</p>
+            </div>
+            <span class="text-xs font-bold ${isSelected ? "text-[#8b0000]" : "text-[#2d4a2d]"}">${isSelected ? "✓ HAPUS" : "+ TAMBAH"}</span>`;
+          div.addEventListener("click", () => {
+            if (isSelected)
+              selectedGroupMembers = selectedGroupMembers.filter(
+                (m) => m.uid !== uid,
+              );
+            else
+              selectedGroupMembers.push({
+                uid,
+                name: u.name,
+                nameTag: u.nameTag || "",
+                photoURL: u.photoURL || "",
+              });
+            renderSelectedMembers();
+            loadGroupUserSearch(search);
+          });
+          container.appendChild(div);
+        });
+        if (filtered.length === 0)
+          container.innerHTML =
+            '<p class="text-center text-[#4a6a4a] text-xs py-3">Tidak ada hasil</p>';
+      }
+
+      function renderSelectedMembers() {
+        const container = document.getElementById("selectedMembers");
+        if (selectedGroupMembers.length === 0) {
+          container.innerHTML =
+            '<p class="text-[#8fb88f] text-xs">Belum ada anggota dipilih</p>';
+          return;
+        }
+        container.innerHTML = "";
+        selectedGroupMembers.forEach((m) => {
+          const span = document.createElement("span");
+          span.className =
+            "flex items-center gap-1 bg-[#2d4a2d] text-[#c8d8a8] text-xs px-2 py-1 cursor-pointer";
+          span.innerHTML = `@${escHtml(m.nameTag || m.name)} <span class="hover:text-red-300">✕</span>`;
+          span.addEventListener("click", () => {
+            selectedGroupMembers = selectedGroupMembers.filter(
+              (sm) => sm.uid !== m.uid,
+            );
+            renderSelectedMembers();
+            loadGroupUserSearch(
+              document.getElementById("groupSearchInput").value,
+            );
+          });
+          container.appendChild(span);
+        });
+      }
+
+      document
+        .getElementById("createGroupConfirmBtn")
+        .addEventListener("click", async () => {
+          const groupName = document
+            .getElementById("groupNameInput")
+            .value.trim();
+          const alertEl = document.getElementById("groupAlertBox");
+          if (!groupName) {
+            alertEl.textContent = "⚠ Nama grup wajib diisi.";
+            alertEl.classList.remove("hidden");
+            return;
+          }
+          if (selectedGroupMembers.length === 0) {
+            alertEl.textContent = "⚠ Tambahkan minimal 1 anggota.";
+            alertEl.classList.remove("hidden");
+            return;
+          }
+
+          const btn = document.getElementById("createGroupConfirmBtn");
+          btn.textContent = "⌛ MEMBUAT...";
+          btn.disabled = true;
+
+          const members = {[currentUser.uid]: true};
+          selectedGroupMembers.forEach((m) => {
+            members[m.uid] = true;
+          });
+
+          try {
+            const groupRef = push(ref(db, "groups"));
+            const groupId = groupRef.key;
+            await set(groupRef, {
+              id: groupId,
+              name: groupName,
+              createdBy: currentUser.uid,
+              createdAt: Date.now(),
+              members,
+              lastMessage: {text: "", timestamp: Date.now()},
+            });
+            await push(ref(db, `groupMessages/${groupId}`), {
+              type: "system",
+              text: `Grup "${groupName}" dibuat oleh ${currentUserData?.name || "pengguna"}`,
+              timestamp: Date.now(),
+              senderId: "system",
+            });
+            document.getElementById("createGroupModal").classList.add("hidden");
+            selectedGroupMembers = [];
+            switchTab("group");
+            openGroupChat(groupId);
+          } catch (err) {
+            alertEl.textContent = "⚠ Gagal membuat grup: " + err.message;
+            alertEl.classList.remove("hidden");
+          }
+          btn.textContent = "▶ BUAT GRUP";
+          btn.disabled = false;
+        });
+
+      // ============================================
+      // RIGHT PANEL — GROUP INFO
+      // ============================================
+      document.getElementById("chatInfoBtn").addEventListener("click", () => {
+        const rp = document.getElementById("rightPanel");
+        rp.classList.toggle("hidden");
+        if (!rp.classList.contains("hidden")) rp.style.display = "flex";
+      });
+      document
+        .getElementById("closeRightPanel")
+        .addEventListener("click", () => {
+          document.getElementById("rightPanel").classList.add("hidden");
+          document.getElementById("rightPanel").style.display = "";
+        });
+
+      async function loadRightPanelGroupInfo(groupId, gdata) {
+        const rp = document.getElementById("rightPanelContent");
+        const members = gdata.members || {};
+        const memberEntries = Object.keys(members);
+        let html = `
+          <div class="mb-4 border-b-2 border-[#2d4a2d] pb-3">
+            <div class="w-16 h-16 bg-[#2d4a2d] flex items-center justify-center text-[#c8d8a8] font-bold text-2xl mx-auto mb-2">
+              ${gdata.name.charAt(0).toUpperCase()}
+            </div>
+            <h4 class="text-[#2d4a2d] font-bold text-sm text-center tracking-wider">${escHtml(gdata.name)}</h4>
+            <p class="text-center text-[#4a6a4a] text-xs">${memberEntries.length} anggota</p>
+          </div>
+          <div class="mb-3">
+            <p class="font-bold text-[#2d4a2d] tracking-wider mb-2 border-b border-dashed border-[#2d4a2d] pb-1">▶ ANGGOTA:</p>`;
+        for (const uid of memberEntries) {
+          const u = allUsers[uid] || {};
+          const isCreator = uid === gdata.createdBy;
+          html += `
+            <div class="flex items-center gap-2 py-2 border-b border-[#c8d8a8]">
+              <div class="relative">
+                <img src="${escHtml(u.photoURL || defaultAvatar(u.name || "U"))}" class="w-8 h-8 object-cover border border-[#2d4a2d]" onerror="this.src='${defaultAvatar(u.name || "U")}'" />
+                <span class="absolute -bottom-1 -right-1 w-2 h-2 rounded-full ${getStatusClass(u.status || "offline")} border border-[#2d4a2d]"></span>
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="font-bold text-[#2d4a2d] text-xs truncate">${escHtml(u.name || "Unknown")}</p>
+                <p class="text-[#4a6a4a] text-xs">@${escHtml(u.nameTag || "")} ${isCreator ? '<span class="nametag-badge">ADMIN</span>' : ""}</p>
+              </div>
+            </div>`;
+        }
+        html += "</div>";
+        if (gdata.createdBy === currentUser.uid) {
+          html += `
+            <button onclick="window.addGroupMemberUI('${groupId}')" class="classic-btn bg-[#c8d8a8] text-[#2d4a2d] w-full py-1 text-xs font-bold tracking-wider mb-2">+ TAMBAH ANGGOTA</button>
+            <button onclick="window.deleteGroup('${groupId}')" class="classic-btn bg-[#8b0000] text-white w-full py-1 text-xs font-bold tracking-wider">✕ HAPUS GRUP</button>`;
+        } else {
+          html += `<button onclick="window.leaveGroup('${groupId}')" class="classic-btn bg-[#8b0000] text-white w-full py-1 text-xs font-bold tracking-wider">▶ KELUAR GRUP</button>`;
+        }
+        rp.innerHTML = html;
+      }
+
+      window.deleteGroup = async (groupId) => {
+        if (!confirm("Hapus grup ini? Semua pesan akan hilang.")) return;
+        try {
+          await remove(ref(db, "groups/" + groupId));
+          await remove(ref(db, "groupMessages/" + groupId));
+          document.getElementById("noChatSelected").classList.remove("hidden");
+          document.getElementById("chatArea").style.display = "none";
+          document.getElementById("chatArea").classList.add("hidden");
+          document.getElementById("rightPanel").classList.add("hidden");
+          currentChat = null;
+          renderChatList();
+        } catch (err) {
+          alert("Gagal menghapus grup: " + err.message);
+        }
+      };
+
+      window.leaveGroup = async (groupId) => {
+        if (!confirm("Keluar dari grup ini?")) return;
+        try {
+          await remove(ref(db, `groups/${groupId}/members/${currentUser.uid}`));
+          await push(ref(db, `groupMessages/${groupId}`), {
+            type: "system",
+            text: `${currentUserData?.name || "Seseorang"} meninggalkan grup`,
+            timestamp: Date.now(),
+            senderId: "system",
+          });
+          document.getElementById("noChatSelected").classList.remove("hidden");
+          document.getElementById("chatArea").style.display = "none";
+          document.getElementById("chatArea").classList.add("hidden");
+          document.getElementById("rightPanel").classList.add("hidden");
+          currentChat = null;
+          renderChatList();
+        } catch (err) {
+          alert("Gagal keluar grup: " + err.message);
+        }
+      };
+
+      window.addGroupMemberUI = async (groupId) => {
+        const nameTag = prompt("Masukkan name tag anggota baru (tanpa @):");
+        if (!nameTag) return;
+        try {
+          const tagSnap = await get(
+            ref(db, "nameTags/" + nameTag.toLowerCase()),
+          );
+          if (!tagSnap.exists()) {
+            alert("Pengguna @" + nameTag + " tidak ditemukan.");
+            return;
+          }
+          const uid = tagSnap.val();
+          await update(ref(db, "groups/" + groupId + "/members"), {
+            [uid]: true,
+          });
+          await push(ref(db, "groupMessages/" + groupId), {
+            type: "system",
+            text: `${allUsers[uid]?.name || nameTag} bergabung ke grup`,
+            timestamp: Date.now(),
+            senderId: "system",
+          });
+          const snap = await get(ref(db, "groups/" + groupId));
+          if (snap.exists()) {
+            groupMembers = snap.val().members || {};
+            loadRightPanelGroupInfo(groupId, snap.val());
+          }
+          alert("Berhasil menambahkan @" + nameTag);
+        } catch (err) {
+          alert("Gagal: " + err.message);
+        }
+      };
+
+      // ============================================
+      // TABS
+      // ============================================
+      document
+        .getElementById("tabPrivate")
+        .addEventListener("click", () => switchTab("private"));
+      document
+        .getElementById("tabGroup")
+        .addEventListener("click", () => switchTab("group"));
+
+      function switchTab(tab) {
+        activeTab = tab;
+        document.getElementById("tabPrivate").className =
+          `tab-btn flex-1 py-2 text-xs font-bold tracking-wider ${tab === "private" ? "active" : ""}`;
+        document.getElementById("tabGroup").className =
+          `tab-btn flex-1 py-2 text-xs font-bold tracking-wider ${tab === "group" ? "active" : ""}`;
+        renderChatList();
+      }
+
+      document
+        .getElementById("searchInput")
+        .addEventListener("input", () => renderChatList());
+
+      // ============================================
+      // LOGOUT
+      // ============================================
+      document
+        .getElementById("logoutBtn")
+        .addEventListener("click", async () => {
+          if (!confirm("Yakin ingin keluar?")) return;
+          await update(ref(db, "users/" + currentUser.uid), {
+            status: "offline",
+            lastSeen: Date.now(),
+          });
+          await signOut(auth);
+          window.location.href = "login.html";
+        });
+
+      // ============================================
+      // MOBILE NAVIGATION
+      // ============================================
+      document.getElementById("mobileMenuBtn").addEventListener("click", () => {
+        document.getElementById("leftPanel").classList.toggle("open");
+      });
+      document.getElementById("mobileBackBtn").addEventListener("click", () => {
+        document.getElementById("chatArea").style.display = "none";
+        document.getElementById("chatArea").classList.add("hidden");
+        document.getElementById("noChatSelected").classList.remove("hidden");
+      });
+      function closeMobileSidebar() {
+        document.getElementById("leftPanel").classList.remove("open");
+      }
+
+      // ============================================
+      // UTILITIES
+      // ============================================
+      function getConvId(uid1, uid2) {
+        return [uid1, uid2].sort().join("_");
+      }
+
+      function escHtml(str) {
+        if (!str) return "";
+        return str
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#39;");
+      }
+
+      // Visibility change — update status
+      document.addEventListener("visibilitychange", () => {
+        if (!currentUser) return;
+        update(ref(db, "users/" + currentUser.uid), {
+          status: document.hidden
+            ? "away"
+            : currentUserData?.status || "online",
+          lastSeen: Date.now(),
+        });
+      });
+
+      setInterval(() => {
+        if (currentUser) renderChatList();
+      }, 15000);
+    </script>
+  </body>
 </html>
