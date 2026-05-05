@@ -4,7 +4,6 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ChatKlasik</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💬</text></svg>">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
       @import url("https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&display=swap");
@@ -917,14 +916,12 @@
             await set(ref(db, "nameTags/" + nameTag), currentUser.uid);
           }
 
-          // Use base64 if new photo selected, otherwise keep existing
+          // photoURL for DB: use new base64, or existing, or generated
           const photoURL = profileAvatarBase64 || currentUserData?.photoURL ||
             "https://ui-avatars.com/api/?name=" + encodeURIComponent(name) + "&background=d0ddb8&color=2d4a2d&size=200&bold=true";
 
-          // Auth profile uses generated URL (Auth photoURL has length limit)
-          const authPhotoURL = (profileAvatarBase64 && profileAvatarBase64.startsWith("data:"))
-            ? "https://ui-avatars.com/api/?name=" + encodeURIComponent(name) + "&background=d0ddb8&color=2d4a2d&size=200&bold=true"
-            : photoURL;
+          // Firebase Auth CANNOT store base64 — always use a plain https URL
+          const authPhotoURL = "https://ui-avatars.com/api/?name=" + encodeURIComponent(name) + "&background=d0ddb8&color=2d4a2d&size=200&bold=true";
           await updateProfile(auth.currentUser, { displayName: name, photoURL: authPhotoURL });
 
           await update(ref(db, "users/" + currentUser.uid), { name, nameTag, status, photoURL, lastSeen: Date.now() });
