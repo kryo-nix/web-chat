@@ -52,6 +52,10 @@
       }
       .nametag-badge { background: #2d4a2d; color: #c8d8a8; font-size: 10px; padding: 1px 4px; border: 1px solid #1a3a1a; }
       .unread-badge { background: #cc4444; color: white; font-size: 10px; min-width: 18px; height: 18px; border-radius: 0; display: flex; align-items: center; justify-content: center; border: 1px solid #8b0000; font-weight: bold; }
+      /* Animasi pesan masuk */
+      .msg-row { animation: msgIn 0.15s ease; }
+      @keyframes msgIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+      .date-sep-row { animation: msgIn 0.15s ease; }
     </style>
   </head>
   <body class="bg-[#c8d8a8] flex" style="height: 100dvh; overflow: hidden">
@@ -124,7 +128,6 @@
         <div id="mentionSuggestions" class="hidden border-t-2 border-[#2d4a2d] bg-[#e8f0d8] max-h-32 overflow-y-auto flex-shrink-0"></div>
 
         <div class="border-t-2 border-[#2d4a2d] bg-[#d8e8c8] p-2 flex-shrink-0">
-          <!-- Image Preview -->
           <div id="imagePreviewArea" class="hidden mb-2 p-2 bg-[#e8f0d8] border-2 border-[#2d4a2d] flex items-center gap-2">
             <img id="imagePreviewThumb" class="w-16 h-16 object-cover border border-[#2d4a2d]" />
             <div class="flex-1">
@@ -260,8 +263,8 @@
         getAuth, signOut, onAuthStateChanged, updateProfile,
       } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-auth.js";
       import {
-        getDatabase, ref, set, get, push, onValue, off, update,
-        serverTimestamp, onDisconnect, query, orderByChild, limitToLast, remove,
+        getDatabase, ref, set, get, push, onValue, onChildAdded, onChildChanged, onChildRemoved,
+        off, update, serverTimestamp, onDisconnect, query, orderByChild, limitToLast, remove,
       } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-database.js";
 
       const firebaseConfig = {
@@ -316,12 +319,15 @@
       let pendingImageBase64 = null;
       let pendingImageName = null;
       let activeTab = "private";
-      let messageListeners = {};
+      // ★ FIX: Simpan referensi listener onChildAdded agar bisa di-detach
+      let activeMessageUnsubscribers = [];
       let chatListeners = {};
       let unreadCounts = {};
       let groupMembers = {};
       let mentionQuery = null;
       let mentionStartPos = null;
+      // ★ FIX: Lacak tanggal terakhir per chat agar date separator tidak duplikat
+      let lastRenderedDate = "";
 
       // ============================================
       // INIT & AUTH
@@ -607,95 +613,136 @@
       }
 
       // ============================================
-      // MESSAGES
+      // ★ FIX UTAMA: LOAD MESSAGES DENGAN onChildAdded
       // ============================================
       function loadMessages(chatId, type) {
-        Object.keys(messageListeners).forEach((key) => { off(messageListeners[key]); });
-        messageListeners = {};
+        // 1. Hentikan semua listener lama
+        activeMessageUnsubscribers.forEach((unsub) => unsub());
+        activeMessageUnsubscribers = [];
+
+        // 2. Reset state & UI
+        lastRenderedDate = "";
+        const container = document.getElementById("messagesContainer");
+        container.innerHTML = '<div class="scanline-light"></div><div class="text-center text-[#4a6a4a] text-xs py-8 blink" id="loadingMsgHint">[ MEMUAT PESAN... ]</div>';
 
         const msgPath = type === "group" ? `groupMessages/${chatId}` : `messages/${chatId}`;
         const msgRef = query(ref(db, msgPath), orderByChild("timestamp"), limitToLast(100));
-        const container = document.getElementById("messagesContainer");
-        container.innerHTML = '<div class="text-center text-[#4a6a4a] text-xs py-4 blink">[ MEMUAT PESAN... ]</div>';
 
-        messageListeners["current"] = msgRef;
-        onValue(msgRef, (snap) => {
-          const msgs = [];
-          if (snap.exists()) snap.forEach((child) => msgs.push({ id: child.key, ...child.val() }));
-          renderMessages(msgs, container);
+        // 3. onChildAdded — dipanggil sekali untuk setiap pesan yang sudah ada,
+        //    lalu dipanggil lagi setiap kali ada pesan baru masuk secara real-time
+        const unsubAdded = onChildAdded(msgRef, (snap) => {
+          // Hapus hint "memuat" saat pesan pertama tiba
+          const hint = document.getElementById("loadingMsgHint");
+          if (hint) hint.remove();
+
+          appendSingleMessage(snap.val(), container);
+          scrollToBottom(container);
         });
+
+        // 4. onChildChanged — update pesan yang berubah (opsional, tapi bagus untuk edit)
+        const unsubChanged = onChildChanged(msgRef, (snap) => {
+          const existing = document.getElementById("msgrow-" + snap.key);
+          if (existing) {
+            // Re-render baris pesan yang berubah
+            const newEl = buildMessageElement(snap.val(), snap.key);
+            if (newEl) existing.replaceWith(newEl);
+          }
+        });
+
+        // 5. Simpan fungsi unsubscribe
+        activeMessageUnsubscribers.push(unsubAdded, unsubChanged);
+
+        // 6. Jika tidak ada pesan sama sekali dalam 2 detik, tampilkan hint kosong
+        setTimeout(() => {
+          const hint = document.getElementById("loadingMsgHint");
+          if (hint) {
+            hint.classList.remove("blink");
+            hint.innerHTML = '<div class="classic-border inline-block px-4 py-2 bg-[#e8f0d8]">[ BELUM ADA PESAN ]<br><span class="text-[#8fb88f]">Mulai percakapan sekarang!</span></div>';
+          }
+        }, 2000);
       }
 
-      function renderMessages(msgs, container) {
-        if (msgs.length === 0) {
-          container.innerHTML = '<div class="text-center text-[#4a6a4a] text-xs py-8"><div class="classic-border inline-block px-4 py-2 bg-[#e8f0d8]">[ BELUM ADA PESAN ]<br><span class="text-[#8fb88f]">Mulai percakapan sekarang!</span></div></div>';
-          return;
+      // ★ Render satu pesan dan append ke container
+      function appendSingleMessage(msg, container) {
+        if (!msg) return;
+
+        const date = msg.timestamp ? new Date(msg.timestamp) : new Date();
+        const dateStr = date.toLocaleDateString("id-ID", { weekday: "short", day: "numeric", month: "short" });
+
+        // Tambahkan date separator jika hari baru
+        if (dateStr !== lastRenderedDate) {
+          lastRenderedDate = dateStr;
+          const sep = document.createElement("div");
+          sep.className = "date-sep-row flex items-center justify-center my-3";
+          sep.innerHTML = `<span class="text-[#4a6a4a] text-xs border-2 border-dashed border-[#4a6a4a] px-3 py-1 bg-[#d0ddb8]">— ${dateStr} —</span>`;
+          container.appendChild(sep);
         }
-        container.innerHTML = "";
-        let lastDate = "";
 
-        msgs.forEach((msg) => {
-          const isMe = msg.senderId === currentUser.uid;
-          const date = msg.timestamp ? new Date(msg.timestamp) : new Date();
-          const dateStr = date.toLocaleDateString("id-ID", { weekday: "short", day: "numeric", month: "short" });
-          const timeStr = date.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
+        const el = buildMessageElement(msg, null);
+        if (el) container.appendChild(el);
+      }
 
-          if (dateStr !== lastDate) {
-            lastDate = dateStr;
-            const sep = document.createElement("div");
-            sep.className = "flex items-center justify-center my-3";
-            sep.innerHTML = `<span class="text-[#4a6a4a] text-xs border-2 border-dashed border-[#4a6a4a] px-3 py-1 bg-[#d0ddb8]">— ${dateStr} —</span>`;
-            container.appendChild(sep);
-          }
+      // ★ Buat elemen DOM untuk satu pesan
+      function buildMessageElement(msg, keyOverride) {
+        if (!msg) return null;
+        const isMe = msg.senderId === currentUser.uid;
+        const date = msg.timestamp ? new Date(msg.timestamp) : new Date();
+        const timeStr = date.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
+        const senderData = allUsers[msg.senderId] || { name: "Unknown", nameTag: "" };
 
-          if (msg.type === "system") {
-            const div = document.createElement("div");
-            div.className = "flex justify-center my-1";
-            div.innerHTML = `<span class="msg-bubble-system text-xs px-3 py-1 max-w-xs text-center">${escHtml(msg.text)}</span>`;
-            container.appendChild(div);
-            return;
-          }
+        const div = document.createElement("div");
+        if (keyOverride) div.id = "msgrow-" + keyOverride;
+        div.className = "msg-row";
 
-          const senderData = allUsers[msg.senderId] || { name: "Unknown", nameTag: "" };
-          const div = document.createElement("div");
-          div.className = `flex ${isMe ? "justify-end" : "justify-start"} mb-2 items-end gap-2`;
+        if (msg.type === "system") {
+          div.className += " flex justify-center my-1";
+          div.innerHTML = `<span class="msg-bubble-system text-xs px-3 py-1 max-w-xs text-center">${escHtml(msg.text)}</span>`;
+          return div;
+        }
 
-          let contentHtml = "";
-          if (msg.type === "image") {
-            const safeUrl = escHtml(msg.imageUrl || "");
-            contentHtml = `
-              <img src="${safeUrl}" class="img-msg" alt="gambar" onclick="window.openImageView('${safeUrl}')"
-                onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" />
-              <p class="hidden text-xs text-red-500">[Gambar tidak tersedia]</p>
-              ${msg.text ? `<p class="text-xs mt-1">${parseMentions(escHtml(msg.text))}</p>` : ""}`;
-          } else {
-            contentHtml = `<p class="text-sm leading-relaxed break-words">${parseMentions(escHtml(msg.text || ""))}</p>`;
-          }
+        div.className += ` flex ${isMe ? "justify-end" : "justify-start"} mb-2 items-end gap-2`;
 
-          let senderInfo = "";
-          if (!isMe && currentChat?.type === "group") {
-            senderInfo = `<p class="text-xs font-bold mb-1 text-[#2d4a2d]">${escHtml(senderData.name)}<span class="nametag-badge ml-1">@${escHtml(senderData.nameTag || "")}</span></p>`;
-          }
+        let contentHtml = "";
+        if (msg.type === "image") {
+          const safeUrl = escHtml(msg.imageUrl || "");
+          contentHtml = `
+            <img src="${safeUrl}" class="img-msg" alt="gambar" onclick="window.openImageView('${safeUrl}')"
+              onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" />
+            <p class="hidden text-xs text-red-500">[Gambar tidak tersedia]</p>
+            ${msg.text ? `<p class="text-xs mt-1">${parseMentions(escHtml(msg.text))}</p>` : ""}`;
+        } else {
+          contentHtml = `<p class="text-sm leading-relaxed break-words">${parseMentions(escHtml(msg.text || ""))}</p>`;
+        }
 
-          if (isMe) {
-            div.innerHTML = `
-              <div class="max-w-xs lg:max-w-md">
-                ${senderInfo}
-                <div class="msg-bubble-me px-3 py-2">${contentHtml}</div>
-                <p class="text-right text-xs text-[#4a6a4a] mt-1">${timeStr} ✓</p>
-              </div>`;
-          } else {
-            div.innerHTML = `
-              <img src="${escHtml(senderData.photoURL || defaultAvatar(senderData.name))}" class="w-7 h-7 object-cover border border-[#2d4a2d] flex-shrink-0 mb-5" onerror="this.src='${defaultAvatar(senderData.name)}'" />
-              <div class="max-w-xs lg:max-w-md">
-                ${senderInfo}
-                <div class="msg-bubble-other px-3 py-2">${contentHtml}</div>
-                <p class="text-xs text-[#4a6a4a] mt-1">${timeStr}</p>
-              </div>`;
-          }
-          container.appendChild(div);
+        let senderInfo = "";
+        if (!isMe && currentChat?.type === "group") {
+          senderInfo = `<p class="text-xs font-bold mb-1 text-[#2d4a2d]">${escHtml(senderData.name)}<span class="nametag-badge ml-1">@${escHtml(senderData.nameTag || "")}</span></p>`;
+        }
+
+        if (isMe) {
+          div.innerHTML = `
+            <div class="max-w-xs lg:max-w-md">
+              ${senderInfo}
+              <div class="msg-bubble-me px-3 py-2">${contentHtml}</div>
+              <p class="text-right text-xs text-[#4a6a4a] mt-1">${timeStr} ✓</p>
+            </div>`;
+        } else {
+          div.innerHTML = `
+            <img src="${escHtml(senderData.photoURL || defaultAvatar(senderData.name))}" class="w-7 h-7 object-cover border border-[#2d4a2d] flex-shrink-0 mb-5" onerror="this.src='${defaultAvatar(senderData.name)}'" />
+            <div class="max-w-xs lg:max-w-md">
+              ${senderInfo}
+              <div class="msg-bubble-other px-3 py-2">${contentHtml}</div>
+              <p class="text-xs text-[#4a6a4a] mt-1">${timeStr}</p>
+            </div>`;
+        }
+        return div;
+      }
+
+      function scrollToBottom(container) {
+        // Gunakan requestAnimationFrame agar DOM selesai render dulu
+        requestAnimationFrame(() => {
+          container.scrollTop = container.scrollHeight;
         });
-        container.scrollTop = container.scrollHeight;
       }
 
       function parseMentions(text) {
@@ -723,7 +770,6 @@
 
         try {
           if (pendingImageBase64) {
-            // Store image as base64 directly in Realtime DB
             const imgMsg = { ...msgData, type: "image", imageUrl: pendingImageBase64, text: text || "" };
             await push(ref(db, msgPath), imgMsg);
             await update(ref(db, convBasePath), { lastMessage: { type: "image", text: "📷 Gambar", timestamp: Date.now() } });
@@ -743,7 +789,7 @@
       }
 
       // ============================================
-      // IMAGE HANDLING (base64 only, no Storage)
+      // IMAGE HANDLING
       // ============================================
       document.getElementById("attachImageBtn").addEventListener("click", () => {
         document.getElementById("imageInput").click();
@@ -752,22 +798,15 @@
       document.getElementById("imageInput").addEventListener("change", async (e) => {
         const file = e.target.files[0];
         if (!file) return;
-        // Limit to 300KB original before resize
-        if (file.size > 3 * 1024 * 1024) {
-          alert("Ukuran gambar maksimal 3MB.");
-          return;
-        }
+        if (file.size > 3 * 1024 * 1024) { alert("Ukuran gambar maksimal 3MB."); return; }
         try {
-          // Resize to max 600px, quality 0.65 to keep base64 reasonable in DB
           const base64 = await resizeImageToBase64(file, 600, 0.65);
           pendingImageBase64 = base64;
           pendingImageName = file.name;
           document.getElementById("imagePreviewThumb").src = base64;
           document.getElementById("imagePreviewName").textContent = file.name;
           document.getElementById("imagePreviewArea").classList.remove("hidden");
-        } catch (err) {
-          alert("Gagal memproses gambar.");
-        }
+        } catch (err) { alert("Gagal memproses gambar."); }
       });
 
       document.getElementById("cancelImageBtn").addEventListener("click", clearImagePreview);
@@ -779,7 +818,6 @@
         document.getElementById("imagePreviewArea").classList.add("hidden");
       }
 
-      // Image Viewer
       window.openImageView = (url) => {
         document.getElementById("imageViewFull").src = url;
         document.getElementById("imageViewModal").classList.remove("hidden");
@@ -900,8 +938,7 @@
         if (!/^[a-z0-9_]+$/.test(nameTag)) { alertEl.textContent = "⚠ Name tag hanya boleh huruf kecil, angka, garis bawah."; alertEl.classList.remove("hidden"); return; }
 
         const btn = document.getElementById("saveProfileBtn");
-        btn.textContent = "⌛ MENYIMPAN...";
-        btn.disabled = true;
+        btn.textContent = "⌛ MENYIMPAN..."; btn.disabled = true;
 
         try {
           if (nameTag !== currentUserData?.nameTag) {
@@ -916,14 +953,11 @@
             await set(ref(db, "nameTags/" + nameTag), currentUser.uid);
           }
 
-          // photoURL for DB: use new base64, or existing, or generated
           const photoURL = profileAvatarBase64 || currentUserData?.photoURL ||
             "https://ui-avatars.com/api/?name=" + encodeURIComponent(name) + "&background=d0ddb8&color=2d4a2d&size=200&bold=true";
 
-          // Firebase Auth CANNOT store base64 — always use a plain https URL
           const authPhotoURL = "https://ui-avatars.com/api/?name=" + encodeURIComponent(name) + "&background=d0ddb8&color=2d4a2d&size=200&bold=true";
           await updateProfile(auth.currentUser, { displayName: name, photoURL: authPhotoURL });
-
           await update(ref(db, "users/" + currentUser.uid), { name, nameTag, status, photoURL, lastSeen: Date.now() });
 
           currentUserData = { ...currentUserData, name, nameTag, status, photoURL };
@@ -1184,6 +1218,10 @@
         document.getElementById("chatArea").style.display = "none";
         document.getElementById("chatArea").classList.add("hidden");
         document.getElementById("noChatSelected").classList.remove("hidden");
+        // ★ Stop listener saat back agar tidak bocor memori
+        activeMessageUnsubscribers.forEach((unsub) => unsub());
+        activeMessageUnsubscribers = [];
+        currentChat = null;
       });
       function closeMobileSidebar() { document.getElementById("leftPanel").classList.remove("open"); }
 
@@ -1197,7 +1235,6 @@
         return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
       }
 
-      // Visibility change — update status
       document.addEventListener("visibilitychange", () => {
         if (!currentUser) return;
         update(ref(db, "users/" + currentUser.uid), {
