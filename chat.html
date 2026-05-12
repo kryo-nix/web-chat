@@ -54,10 +54,31 @@
       }
       .nametag-badge { background: #2d4a2d; color: #c8d8a8; font-size: 10px; padding: 1px 4px; border: 1px solid #1a3a1a; }
       .unread-badge { background: #cc4444; color: white; font-size: 10px; min-width: 18px; height: 18px; border-radius: 0; display: flex; align-items: center; justify-content: center; border: 1px solid #8b0000; font-weight: bold; }
-      /* Animasi pesan masuk */
       .msg-row { animation: msgIn 0.15s ease; }
       @keyframes msgIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
       .date-sep-row { animation: msgIn 0.15s ease; }
+
+      /* ── MSG ACTION MENU ── */
+      .msg-actions { display: none; position: absolute; top: -6px; z-index: 10; }
+      .msg-row-wrap:hover .msg-actions { display: flex; }
+      .msg-actions-me { right: 100%; margin-right: 4px; }
+      .msg-actions-other { left: 100%; margin-left: 4px; }
+      .action-btn { background: #2d4a2d; color: #c8d8a8; border: 1px solid #1a3a1a; font-size: 10px; padding: 2px 6px; cursor: pointer; white-space: nowrap; }
+      .action-btn:hover { background: #1a3a1a; }
+      .action-btn-danger { background: #8b0000; border-color: #660000; }
+      .action-btn-danger:hover { background: #660000; }
+
+      /* ── REPLY PREVIEW (di dalam bubble) ── */
+      .reply-preview { border-left: 3px solid #8fb88f; padding: 3px 6px; margin-bottom: 4px; background: rgba(0,0,0,0.15); font-size: 11px; }
+      .reply-preview-other { border-left-color: #2d4a2d; background: rgba(45,74,45,0.1); }
+
+      /* ── REPLY BAR (input area) ── */
+      #replyBar { display:none; background:#d0ddb8; border-top:2px solid #2d4a2d; padding:4px 8px; font-size:11px; color:#2d4a2d; align-items:center; gap:6px; }
+      #replyBar.visible { display:flex; }
+      .reply-bar-text { flex:1; font-size:11px; color:#2d4a2d; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
+
+      /* ── DELETED MSG ── */
+      .msg-deleted { opacity: 0.5; font-style: italic; }
     </style>
   </head>
   <body class="bg-[#c8d8a8] flex" style="height: 100dvh; overflow: hidden">
@@ -128,6 +149,13 @@
         </div>
 
         <div id="mentionSuggestions" class="hidden border-t-2 border-[#2d4a2d] bg-[#e8f0d8] max-h-32 overflow-y-auto flex-shrink-0"></div>
+
+        <!-- REPLY BAR -->
+        <div id="replyBar" class="flex-shrink-0">
+          <span class="text-[#4a6a4a] font-bold text-xs">↩ REPLY:</span>
+          <span id="replyBarText" class="reply-bar-text"></span>
+          <button id="cancelReplyBtn" class="action-btn action-btn-danger text-xs px-2 py-0">✕</button>
+        </div>
 
         <div class="border-t-2 border-[#2d4a2d] bg-[#d8e8c8] p-2 flex-shrink-0">
           <div id="imagePreviewArea" class="hidden mb-2 p-2 bg-[#e8f0d8] border-2 border-[#2d4a2d] flex items-center gap-2">
@@ -219,8 +247,21 @@
         <div class="bg-[#2d4a2d] py-2 px-4 classic-border" style="border-bottom: none">
           <h3 class="text-[#c8d8a8] font-bold tracking-widest text-sm">■ BUAT GRUP BARU ■</h3>
         </div>
-        <div class="bg-[#e8f0d8] classic-border p-5">
+        <div class="bg-[#e8f0d8] classic-border p-5 max-h-[85vh] overflow-y-auto">
           <div id="groupAlertBox" class="hidden mb-3 p-2 border-2 border-[#8b0000] bg-[#ffe8e8] text-[#8b0000] text-xs"></div>
+
+          <!-- ★ FOTO PROFIL GRUP -->
+          <div class="flex flex-col items-center mb-4">
+            <div class="relative mb-2 cursor-pointer" id="groupAvatarPreviewWrap" title="Klik untuk ganti foto grup">
+              <div id="groupAvatarInitial" class="w-20 h-20 bg-[#2d4a2d] flex items-center justify-center text-[#c8d8a8] font-bold text-3xl border-2 border-[#1a3a1a]">G</div>
+              <img id="groupAvatarPreview" src="" class="w-20 h-20 object-cover border-2 border-[#1a3a1a] hidden" alt="foto grup" />
+              <div class="absolute -bottom-2 -right-2 bg-[#2d4a2d] text-[#c8d8a8] text-xs px-1 font-bold border border-[#1a3a1a]">+</div>
+            </div>
+            <input type="file" id="groupAvatarInput" accept="image/*" class="hidden" />
+            <button type="button" id="uploadGroupAvatarBtn" class="classic-btn bg-[#c8d8a8] text-[#2d4a2d] px-3 py-1 text-xs font-bold mt-2">📷 FOTO GRUP</button>
+            <p class="text-[#8fb88f] text-xs mt-1">Opsional · Max 500KB</p>
+          </div>
+
           <div class="space-y-3">
             <div>
               <label class="block text-[#2d4a2d] text-xs font-bold mb-1 tracking-wider">NAMA GRUP:</label>
@@ -321,15 +362,19 @@
       let pendingImageBase64 = null;
       let pendingImageName = null;
       let activeTab = "private";
-      // ★ FIX: Simpan referensi listener onChildAdded agar bisa di-detach
       let activeMessageUnsubscribers = [];
       let chatListeners = {};
       let unreadCounts = {};
       let groupMembers = {};
       let mentionQuery = null;
       let mentionStartPos = null;
-      // ★ FIX: Lacak tanggal terakhir per chat agar date separator tidak duplikat
       let lastRenderedDate = "";
+
+      // ★ REPLY STATE
+      let replyTo = null; // { msgKey, senderName, text }
+
+      // ★ GROUP AVATAR STATE (buat grup)
+      let groupAvatarBase64 = null;
 
       // ============================================
       // INIT & AUTH
@@ -511,12 +556,11 @@
         items.forEach((item) => {
           const div = document.createElement("div");
           div.className = "chat-item px-3 py-3 flex items-center gap-2" + (currentChat?.id === item.id ? " active" : "");
+          const avatarHtml = item.avatar
+            ? `<img src="${escHtml(item.avatar)}" class="w-10 h-10 object-cover border-2 border-[#2d4a2d]" onerror="this.style.display='none'" />`
+            : `<div class="w-10 h-10 border-2 border-[#2d4a2d] bg-[#2d4a2d] flex items-center justify-center text-[#c8d8a8] font-bold text-sm">${item.name.charAt(0).toUpperCase()}</div>`;
           div.innerHTML = `
-            <div class="relative flex-shrink-0">
-              <div class="w-10 h-10 border-2 border-[#2d4a2d] bg-[#2d4a2d] flex items-center justify-center text-[#c8d8a8] font-bold text-sm">
-                ${item.name.charAt(0).toUpperCase()}
-              </div>
-            </div>
+            <div class="relative flex-shrink-0">${avatarHtml}</div>
             <div class="flex-1 min-w-0">
               <div class="flex items-center justify-between">
                 <span class="text-[#2d4a2d] font-bold text-xs truncate">👥 ${escHtml(item.name)}</span>
@@ -555,6 +599,7 @@
         const otherUser = allUsers[otherUid] || {};
         currentChat = { type: "private", id: convId, otherUid, name: otherUser.name || "Unknown", avatar: otherUser.photoURL || "", nameTag: otherUser.nameTag || "" };
         groupMembers = {};
+        clearReply();
 
         const convSnap = await get(ref(db, "conversations/" + convId));
         if (!convSnap.exists()) {
@@ -580,6 +625,7 @@
         const gdata = snap.val();
         currentChat = { type: "group", id: groupId, name: gdata.name, avatar: gdata.avatar || "", createdBy: gdata.createdBy };
         groupMembers = gdata.members || {};
+        clearReply();
         showChatArea();
         updateChatHeader();
         loadMessages(groupId, "group");
@@ -608,21 +654,23 @@
           statusDot.className = `absolute -bottom-1 -right-1 w-3 h-3 rounded-full border border-[#2d4a2d] ${getStatusClass(status)}`;
           document.getElementById("chatSubtitle").textContent = getStatusLabel(status) + (currentChat.nameTag ? " · @" + currentChat.nameTag : "");
         } else {
-          avatarEl.src = defaultAvatar(currentChat.name);
+          if (currentChat.avatar) {
+            avatarEl.src = currentChat.avatar;
+            avatarEl.onerror = () => { avatarEl.src = defaultAvatar(currentChat.name); };
+          } else {
+            avatarEl.src = defaultAvatar(currentChat.name);
+          }
           statusDot.className = "absolute -bottom-1 -right-1 w-3 h-3 rounded-full border border-[#2d4a2d] status-online";
           document.getElementById("chatSubtitle").textContent = `👥 ${Object.keys(groupMembers).length} anggota`;
         }
       }
 
       // ============================================
-      // ★ FIX UTAMA: LOAD MESSAGES DENGAN onChildAdded
+      // LOAD MESSAGES
       // ============================================
       function loadMessages(chatId, type) {
-        // 1. Hentikan semua listener lama
         activeMessageUnsubscribers.forEach((unsub) => unsub());
         activeMessageUnsubscribers = [];
-
-        // 2. Reset state & UI
         lastRenderedDate = "";
         const container = document.getElementById("messagesContainer");
         container.innerHTML = '<div class="scanline-light"></div><div class="text-center text-[#4a6a4a] text-xs py-8 blink" id="loadingMsgHint">[ MEMUAT PESAN... ]</div>';
@@ -630,31 +678,29 @@
         const msgPath = type === "group" ? `groupMessages/${chatId}` : `messages/${chatId}`;
         const msgRef = query(ref(db, msgPath), orderByChild("timestamp"), limitToLast(100));
 
-        // 3. onChildAdded — dipanggil sekali untuk setiap pesan yang sudah ada,
-        //    lalu dipanggil lagi setiap kali ada pesan baru masuk secara real-time
         const unsubAdded = onChildAdded(msgRef, (snap) => {
-          // Hapus hint "memuat" saat pesan pertama tiba
           const hint = document.getElementById("loadingMsgHint");
           if (hint) hint.remove();
-
-          appendSingleMessage(snap.val(), container);
+          appendSingleMessage(snap.val(), snap.key, container);
           scrollToBottom(container);
         });
 
-        // 4. onChildChanged — update pesan yang berubah (opsional, tapi bagus untuk edit)
         const unsubChanged = onChildChanged(msgRef, (snap) => {
           const existing = document.getElementById("msgrow-" + snap.key);
           if (existing) {
-            // Re-render baris pesan yang berubah
             const newEl = buildMessageElement(snap.val(), snap.key);
             if (newEl) existing.replaceWith(newEl);
           }
         });
 
-        // 5. Simpan fungsi unsubscribe
-        activeMessageUnsubscribers.push(unsubAdded, unsubChanged);
+        // ★ onChildRemoved — hapus elemen saat pesan dihapus
+        const unsubRemoved = onChildRemoved(msgRef, (snap) => {
+          const el = document.getElementById("msgrow-" + snap.key);
+          if (el) el.remove();
+        });
 
-        // 6. Jika tidak ada pesan sama sekali dalam 2 detik, tampilkan hint kosong
+        activeMessageUnsubscribers.push(unsubAdded, unsubChanged, unsubRemoved);
+
         setTimeout(() => {
           const hint = document.getElementById("loadingMsgHint");
           if (hint) {
@@ -664,14 +710,10 @@
         }, 2000);
       }
 
-      // ★ Render satu pesan dan append ke container
-      function appendSingleMessage(msg, container) {
+      function appendSingleMessage(msg, key, container) {
         if (!msg) return;
-
         const date = msg.timestamp ? new Date(msg.timestamp) : new Date();
         const dateStr = date.toLocaleDateString("id-ID", { weekday: "short", day: "numeric", month: "short" });
-
-        // Tambahkan date separator jika hari baru
         if (dateStr !== lastRenderedDate) {
           lastRenderedDate = dateStr;
           const sep = document.createElement("div");
@@ -679,13 +721,14 @@
           sep.innerHTML = `<span class="text-[#4a6a4a] text-xs border-2 border-dashed border-[#4a6a4a] px-3 py-1 bg-[#d0ddb8]">— ${dateStr} —</span>`;
           container.appendChild(sep);
         }
-
-        const el = buildMessageElement(msg, null);
+        const el = buildMessageElement(msg, key);
         if (el) container.appendChild(el);
       }
 
-      // ★ Buat elemen DOM untuk satu pesan
-      function buildMessageElement(msg, keyOverride) {
+      // ============================================
+      // ★ BUILD MESSAGE ELEMENT (dengan reply + action menu)
+      // ============================================
+      function buildMessageElement(msg, key) {
         if (!msg) return null;
         const isMe = msg.senderId === currentUser.uid;
         const date = msg.timestamp ? new Date(msg.timestamp) : new Date();
@@ -693,17 +736,32 @@
         const senderData = allUsers[msg.senderId] || { name: "Unknown", nameTag: "" };
 
         const div = document.createElement("div");
-        if (keyOverride) div.id = "msgrow-" + keyOverride;
+        if (key) div.id = "msgrow-" + key;
         div.className = "msg-row";
 
+        // Pesan sistem
         if (msg.type === "system") {
           div.className += " flex justify-center my-1";
           div.innerHTML = `<span class="msg-bubble-system text-xs px-3 py-1 max-w-xs text-center">${escHtml(msg.text)}</span>`;
           return div;
         }
 
+        // Pesan dihapus
+        if (msg.deleted) {
+          div.className += ` flex ${isMe ? "justify-end" : "justify-start"} mb-2`;
+          div.innerHTML = `
+            <div class="max-w-xs">
+              <div class="${isMe ? "msg-bubble-me" : "msg-bubble-other"} px-3 py-2 msg-deleted">
+                <p class="text-xs">🚫 Pesan telah dihapus</p>
+              </div>
+              <p class="text-xs text-[#4a6a4a] mt-1 ${isMe ? "text-right" : ""}">${timeStr}</p>
+            </div>`;
+          return div;
+        }
+
         div.className += ` flex ${isMe ? "justify-end" : "justify-start"} mb-2 items-end gap-2`;
 
+        // Konten pesan
         let contentHtml = "";
         if (msg.type === "image") {
           const safeUrl = escHtml(msg.imageUrl || "");
@@ -716,24 +774,49 @@
           contentHtml = `<p class="text-sm leading-relaxed break-words">${parseMentions(escHtml(msg.text || ""))}</p>`;
         }
 
+        // Reply preview (jika ada)
+        let replyHtml = "";
+        if (msg.replyTo) {
+          const rClass = isMe ? "reply-preview" : "reply-preview-other";
+          replyHtml = `
+            <div class="${rClass}">
+              <span class="font-bold">${escHtml(msg.replyTo.senderName || "?")}</span>: ${escHtml((msg.replyTo.text || "📷 Gambar").substring(0, 60))}${(msg.replyTo.text || "").length > 60 ? "…" : ""}
+            </div>`;
+        }
+
+        // Nama pengirim (grup)
         let senderInfo = "";
         if (!isMe && currentChat?.type === "group") {
           senderInfo = `<p class="text-xs font-bold mb-1 text-[#2d4a2d]">${escHtml(senderData.name)}<span class="nametag-badge ml-1">@${escHtml(senderData.nameTag || "")}</span></p>`;
         }
 
+        // ★ Tombol aksi (reply + delete)
+        const deleteBtn = isMe
+          ? `<button class="action-btn action-btn-danger" onclick="window.deleteMessage('${key}')">🗑 Hapus</button>`
+          : "";
+        const replyBtn = `<button class="action-btn" onclick="window.startReply('${key}', '${escHtml(senderData.name)}', '${escHtml((msg.text || "📷 Gambar").replace(/'/g, "\\'"))}')">↩ Reply</button>`;
+
+        const actionMenuHtml = `
+          <div class="msg-actions ${isMe ? "msg-actions-me flex-col" : "msg-actions-other flex-col"} gap-1">
+            ${replyBtn}
+            ${deleteBtn}
+          </div>`;
+
         if (isMe) {
           div.innerHTML = `
-            <div class="max-w-xs lg:max-w-md">
+            <div class="relative msg-row-wrap max-w-xs lg:max-w-md">
+              ${actionMenuHtml}
               ${senderInfo}
-              <div class="msg-bubble-me px-3 py-2">${contentHtml}</div>
+              <div class="msg-bubble-me px-3 py-2">${replyHtml}${contentHtml}</div>
               <p class="text-right text-xs text-[#4a6a4a] mt-1">${timeStr} ✓</p>
             </div>`;
         } else {
           div.innerHTML = `
             <img src="${escHtml(senderData.photoURL || defaultAvatar(senderData.name))}" class="w-7 h-7 object-cover border border-[#2d4a2d] flex-shrink-0 mb-5" onerror="this.src='${defaultAvatar(senderData.name)}'" />
-            <div class="max-w-xs lg:max-w-md">
+            <div class="relative msg-row-wrap max-w-xs lg:max-w-md">
+              ${actionMenuHtml}
               ${senderInfo}
-              <div class="msg-bubble-other px-3 py-2">${contentHtml}</div>
+              <div class="msg-bubble-other px-3 py-2">${replyHtml}${contentHtml}</div>
               <p class="text-xs text-[#4a6a4a] mt-1">${timeStr}</p>
             </div>`;
         }
@@ -741,15 +824,48 @@
       }
 
       function scrollToBottom(container) {
-        // Gunakan requestAnimationFrame agar DOM selesai render dulu
-        requestAnimationFrame(() => {
-          container.scrollTop = container.scrollHeight;
-        });
+        requestAnimationFrame(() => { container.scrollTop = container.scrollHeight; });
       }
 
       function parseMentions(text) {
         return text.replace(/@([a-z0-9_]+)/gi, (match) => `<span class="mention-highlight">${match}</span>`);
       }
+
+      // ============================================
+      // ★ HAPUS PESAN
+      // ============================================
+      window.deleteMessage = async (msgKey) => {
+        if (!currentChat || !msgKey) return;
+        if (!confirm("Hapus pesan ini?")) return;
+        const msgPath = currentChat.type === "group"
+          ? `groupMessages/${currentChat.id}/${msgKey}`
+          : `messages/${currentChat.id}/${msgKey}`;
+        try {
+          // Soft delete: tandai sebagai deleted agar orang lain lihat "Pesan dihapus"
+          await update(ref(db, msgPath), { deleted: true, text: "", imageUrl: "" });
+        } catch (err) {
+          alert("Gagal menghapus pesan: " + err.message);
+        }
+      };
+
+      // ============================================
+      // ★ REPLY
+      // ============================================
+      window.startReply = (msgKey, senderName, text) => {
+        replyTo = { msgKey, senderName, text };
+        const bar = document.getElementById("replyBar");
+        document.getElementById("replyBarText").textContent = senderName + ": " + text.substring(0, 80);
+        bar.classList.add("visible");
+        document.getElementById("messageInput").focus();
+      };
+
+      function clearReply() {
+        replyTo = null;
+        document.getElementById("replyBar").classList.remove("visible");
+        document.getElementById("replyBarText").textContent = "";
+      }
+
+      document.getElementById("cancelReplyBtn").addEventListener("click", clearReply);
 
       // ============================================
       // SEND MESSAGE
@@ -766,6 +882,15 @@
           timestamp: Date.now(),
           type: "text",
         };
+
+        // ★ Sertakan data reply jika ada
+        if (replyTo) {
+          msgData.replyTo = {
+            msgKey: replyTo.msgKey,
+            senderName: replyTo.senderName,
+            text: replyTo.text,
+          };
+        }
 
         const msgPath = currentChat.type === "group" ? `groupMessages/${currentChat.id}` : `messages/${currentChat.id}`;
         const convBasePath = currentChat.type === "group" ? `groups/${currentChat.id}` : `conversations/${currentChat.id}`;
@@ -784,6 +909,7 @@
           input.value = "";
           input.style.height = "auto";
           hideMentionSuggestions();
+          clearReply();
         } catch (err) {
           console.error("Send error:", err);
           alert("Gagal mengirim pesan: " + err.message);
@@ -982,7 +1108,7 @@
       });
 
       // ============================================
-      // CREATE GROUP
+      // ★ CREATE GROUP (+ foto profil grup)
       // ============================================
       document.getElementById("createGroupBtn").addEventListener("click", openCreateGroupModal);
 
@@ -991,12 +1117,42 @@
         document.getElementById("groupNameInput").value = "";
         document.getElementById("groupSearchInput").value = "";
         selectedGroupMembers = [];
+        groupAvatarBase64 = null;
+        // Reset preview foto grup
+        document.getElementById("groupAvatarPreview").src = "";
+        document.getElementById("groupAvatarPreview").classList.add("hidden");
+        document.getElementById("groupAvatarInitial").classList.remove("hidden");
+        document.getElementById("groupAvatarInitial").textContent = "G";
+        document.getElementById("groupAvatarInput").value = "";
         renderSelectedMembers();
         await loadGroupUserSearch("");
       }
 
       document.getElementById("closeGroupModalBtn").addEventListener("click", () => {
         document.getElementById("createGroupModal").classList.add("hidden");
+      });
+
+      // ★ Upload foto grup
+      document.getElementById("uploadGroupAvatarBtn").addEventListener("click", () => document.getElementById("groupAvatarInput").click());
+      document.getElementById("groupAvatarPreviewWrap").addEventListener("click", () => document.getElementById("groupAvatarInput").click());
+
+      document.getElementById("groupAvatarInput").addEventListener("change", async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        if (file.size > 500 * 1024) { alert("Ukuran foto grup maksimal 500KB."); return; }
+        try {
+          groupAvatarBase64 = await resizeImageToBase64(file, 200, 0.75);
+          document.getElementById("groupAvatarPreview").src = groupAvatarBase64;
+          document.getElementById("groupAvatarPreview").classList.remove("hidden");
+          document.getElementById("groupAvatarInitial").classList.add("hidden");
+        } catch (err) { alert("Gagal memproses foto."); }
+      });
+
+      // Update inisial saat nama grup diketik
+      document.getElementById("groupNameInput").addEventListener("input", (e) => {
+        const val = e.target.value.trim();
+        const initial = document.getElementById("groupAvatarInitial");
+        initial.textContent = val ? val.charAt(0).toUpperCase() : "G";
       });
 
       document.getElementById("groupSearchInput").addEventListener("input", async (e) => {
@@ -1074,7 +1230,15 @@
         try {
           const groupRef = push(ref(db, "groups"));
           const groupId = groupRef.key;
-          await set(groupRef, { id: groupId, name: groupName, createdBy: currentUser.uid, createdAt: Date.now(), members, lastMessage: { text: "", timestamp: Date.now() } });
+
+          // ★ Simpan avatar grup jika ada
+          const avatarToSave = groupAvatarBase64 || "";
+
+          await set(groupRef, {
+            id: groupId, name: groupName, createdBy: currentUser.uid, createdAt: Date.now(),
+            members, lastMessage: { text: "", timestamp: Date.now() },
+            avatar: avatarToSave,
+          });
           await push(ref(db, `groupMessages/${groupId}`), {
             type: "system",
             text: `Grup "${groupName}" dibuat oleh ${currentUserData?.name || "pengguna"}`,
@@ -1082,6 +1246,7 @@
           });
           document.getElementById("createGroupModal").classList.add("hidden");
           selectedGroupMembers = [];
+          groupAvatarBase64 = null;
           switchTab("group");
           openGroupChat(groupId);
         } catch (err) {
@@ -1092,7 +1257,7 @@
       });
 
       // ============================================
-      // RIGHT PANEL — GROUP INFO
+      // RIGHT PANEL — GROUP INFO (+ ganti foto grup)
       // ============================================
       document.getElementById("chatInfoBtn").addEventListener("click", () => {
         const rp = document.getElementById("rightPanel");
@@ -1108,16 +1273,27 @@
         const rp = document.getElementById("rightPanelContent");
         const members = gdata.members || {};
         const memberEntries = Object.keys(members);
+        const isAdmin = gdata.createdBy === currentUser.uid;
+
+        // Avatar grup
+        const avatarSrc = gdata.avatar
+          ? `<img src="${escHtml(gdata.avatar)}" class="w-16 h-16 object-cover border-2 border-[#2d4a2d] mx-auto mb-2" />`
+          : `<div class="w-16 h-16 bg-[#2d4a2d] flex items-center justify-center text-[#c8d8a8] font-bold text-2xl mx-auto mb-2">${gdata.name.charAt(0).toUpperCase()}</div>`;
+
         let html = `
           <div class="mb-4 border-b-2 border-[#2d4a2d] pb-3">
-            <div class="w-16 h-16 bg-[#2d4a2d] flex items-center justify-center text-[#c8d8a8] font-bold text-2xl mx-auto mb-2">
-              ${gdata.name.charAt(0).toUpperCase()}
-            </div>
+            ${avatarSrc}
             <h4 class="text-[#2d4a2d] font-bold text-sm text-center tracking-wider">${escHtml(gdata.name)}</h4>
             <p class="text-center text-[#4a6a4a] text-xs">${memberEntries.length} anggota</p>
+            ${isAdmin ? `
+            <div class="mt-2 text-center">
+              <input type="file" id="editGroupAvatarInput" accept="image/*" class="hidden" />
+              <button onclick="document.getElementById('editGroupAvatarInput').click()" class="classic-btn bg-[#c8d8a8] text-[#2d4a2d] px-2 py-1 text-xs font-bold w-full">📷 GANTI FOTO GRUP</button>
+            </div>` : ""}
           </div>
           <div class="mb-3">
             <p class="font-bold text-[#2d4a2d] tracking-wider mb-2 border-b border-dashed border-[#2d4a2d] pb-1">▶ ANGGOTA:</p>`;
+
         for (const uid of memberEntries) {
           const u = allUsers[uid] || {};
           const isCreator = uid === gdata.createdBy;
@@ -1134,14 +1310,39 @@
             </div>`;
         }
         html += "</div>";
-        if (gdata.createdBy === currentUser.uid) {
+
+        if (isAdmin) {
           html += `
             <button onclick="window.addGroupMemberUI('${groupId}')" class="classic-btn bg-[#c8d8a8] text-[#2d4a2d] w-full py-1 text-xs font-bold tracking-wider mb-2">+ TAMBAH ANGGOTA</button>
             <button onclick="window.deleteGroup('${groupId}')" class="classic-btn bg-[#8b0000] text-white w-full py-1 text-xs font-bold tracking-wider">✕ HAPUS GRUP</button>`;
         } else {
           html += `<button onclick="window.leaveGroup('${groupId}')" class="classic-btn bg-[#8b0000] text-white w-full py-1 text-xs font-bold tracking-wider">▶ KELUAR GRUP</button>`;
         }
+
         rp.innerHTML = html;
+
+        // ★ Event listener ganti foto grup (admin only)
+        if (isAdmin) {
+          const editAvatarInput = document.getElementById("editGroupAvatarInput");
+          if (editAvatarInput) {
+            editAvatarInput.addEventListener("change", async (e) => {
+              const file = e.target.files[0];
+              if (!file) return;
+              if (file.size > 500 * 1024) { alert("Ukuran foto maksimal 500KB."); return; }
+              try {
+                const base64 = await resizeImageToBase64(file, 200, 0.75);
+                await update(ref(db, "groups/" + groupId), { avatar: base64 });
+                // Update currentChat dan header
+                currentChat.avatar = base64;
+                updateChatHeader();
+                // Reload panel
+                const snap = await get(ref(db, "groups/" + groupId));
+                if (snap.exists()) loadRightPanelGroupInfo(groupId, snap.val());
+                alert("✓ Foto grup berhasil diperbarui!");
+              } catch (err) { alert("Gagal memproses foto: " + err.message); }
+            });
+          }
+        }
       }
 
       window.deleteGroup = async (groupId) => {
@@ -1220,10 +1421,10 @@
         document.getElementById("chatArea").style.display = "none";
         document.getElementById("chatArea").classList.add("hidden");
         document.getElementById("noChatSelected").classList.remove("hidden");
-        // ★ Stop listener saat back agar tidak bocor memori
         activeMessageUnsubscribers.forEach((unsub) => unsub());
         activeMessageUnsubscribers = [];
         currentChat = null;
+        clearReply();
       });
       function closeMobileSidebar() { document.getElementById("leftPanel").classList.remove("open"); }
 
